@@ -5,7 +5,7 @@
 #include <string>
 #include <unistd.h>
 
-ConsoleThread::ConsoleThread(struct * suicideProcesses){
+ConsoleThread::ConsoleThread(SuicideProcess* suicideProcesses){
    this->path = suicideProcesses->filePath;
    this->id = suicideProcesses->id;
    this->lives = suicideProcesses->lives;
@@ -21,7 +21,7 @@ void ConsoleThread::createThread(){
       printf("Error: pthread_create() failed\n");
       exit(EXIT_FAILURE);
    }
-   pthread_exit(NULL); 
+   pthread_exit(NULL);
 }
 
 void *ConsoleThread::worker_thread(void *arg){
@@ -30,13 +30,13 @@ void *ConsoleThread::worker_thread(void *arg){
 }
 
 void ConsoleThread::entry(){
-   pid_t son;
-   fprintf(stdout, "My PID: %d\n", getpid());
-   son = fork();
+   //pid_t son;
+   //fprintf(stdout, "My PID: %d\n", getpid());
+   //son = fork();
    printf("This is worker_thread()\n");
    pthread_exit(NULL);
 }
- int main(){
+/* int main(){
    ConsoleThread* c = new ConsoleThread();
    c->createThread();
- }
+ }*/

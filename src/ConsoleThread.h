@@ -1,6 +1,7 @@
 #ifndef THREAD_H
 #define THREAD_H
 #include<string>
+#include "readFile.h"
 using namespace std;
 
 class ConsoleThread{
@@ -8,7 +9,7 @@ class ConsoleThread{
       string path, id, name;
       int lives;
    public:
-      ConsoleThread(struct * suicideProcesses);
+      ConsoleThread(SuicideProcess* suicideProcesses);
       void createThread();
       static void *worker_thread(void * args);
       void entry();
