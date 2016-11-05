@@ -12,7 +12,8 @@ class ControlConsole{
 
    public:
       ControlConsole(string routeConfigFile, string idSem, string idMem);
-      void CreateThreads();
-      void CreateInterpreter();
+      void createThreads();
+      int countWords(string inputstring);
+      void createInterpreter();
 };
 #endif

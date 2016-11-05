@@ -55,7 +55,7 @@ int main(int argc, const char *argv[]){
       idMem = "conctrlmem";
    }
    ControlConsole controlConsole(routeConfigFile, idSem, idMem);
-   controlConsole.CreateInterpreter();  
+   controlConsole.createInterpreter();  
 
    cout << "R:" << routeConfigFile << " S: " << idSem << " M: " << idMem << endl;
 }
