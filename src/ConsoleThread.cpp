@@ -1,26 +1,26 @@
-#include <stdio.h>
+#include <iostream>
 #include <stdlib.h>
 #include "ConsoleThread.h"
 #include <unistd.h>
 
-ConsoleThread::ConsoleThread(SuicideProcess* suicideProcesses){
-   this->path = suicideProcesses->filePath;
-   this->id = suicideProcesses->id;
-   this->lives = suicideProcesses->lives;
-   this->name = suicideProcesses->fileName;
+ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess){
+   this->path = suicideProcess->filePath;
+   this->id = suicideProcess->id;
+   this->lives = suicideProcess->lives;
+   this->name = suicideProcess->fileName;
 }
 
 void ConsoleThread::createThread(){
-   printf("In main: creating thread\n");
-   this->consoleThread = thread(&ConsoleThread::entry, this);
+   cout << "In main: creating thread" << endl;
+   consoleThread = thread(&ConsoleThread::entry, this);
    //thread myThread(&ConsoleThread::entry, this);
 }
 
 void ConsoleThread::entry(){
-   printf("This is worker_thread()\n");
+   cout << "Thread: " << id << " Lives: " << lives << endl;
 }
 
 void ConsoleThread::join(){
-   this->consoleThread.join();
+   consoleThread.join();
 }
 
