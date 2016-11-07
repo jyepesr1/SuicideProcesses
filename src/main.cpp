@@ -1,4 +1,4 @@
-#include<iostream> 
+#include<iostream>
 #include<string>
 #include<stdlib.h>
 #include "ControlConsole.h"
@@ -12,7 +12,7 @@ void showUsage(){
         << "\t [--semaforo=<id>]\n"
         << "\t [--memoriacompartida=<id>]\n"
         << endl;
-   exit(1);   
+   exit(1);
 }
 
 void split(string argument, string& routeConfigFile, string& idSem, string& idMem){
@@ -55,7 +55,8 @@ int main(int argc, const char *argv[]){
       idMem = "conctrlmem";
    }
    ControlConsole controlConsole(routeConfigFile, idSem, idMem);
-   controlConsole.createInterpreter();  
+   controlConsole.readFile(routeConfigFile);
+   controlConsole.createInterpreter();
 
    cout << "R:" << routeConfigFile << " S: " << idSem << " M: " << idMem << endl;
 }
