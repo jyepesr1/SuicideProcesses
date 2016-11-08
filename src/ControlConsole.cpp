@@ -139,7 +139,7 @@ SuicideProcess* ControlConsole::getProcessInfo(string line){
    int numWords = countWords(line);
    if(numWords != 8){
          errorFile("More lines");
-      }
+   }
 
    SuicideProcess* suicideProcess = new SuicideProcess;
 
@@ -147,19 +147,19 @@ SuicideProcess* ControlConsole::getProcessInfo(string line){
    iss >> token;
    if(token.compare("ProcesoSui") != 0){
          errorFile(token);
-      }
+   }
 
    iss >> token;
    if(token.find_first_of("0123456789") == 0){
          errorFile(token);
-      }
+   }
 
    suicideProcess->id = token;
 
    iss >> token;
    if(token.compare("{") != 0){
          errorFile(token);
-      }
+   }
 
    // get file's path
    iss >> token;
@@ -169,7 +169,7 @@ SuicideProcess* ControlConsole::getProcessInfo(string line){
    iss >> token;
    if(token.compare("::") != 0){
          errorFile(token);
-      }
+   }
 
    // get process' name
    iss >> token;
@@ -180,14 +180,14 @@ SuicideProcess* ControlConsole::getProcessInfo(string line){
    int lives = stoi(token);
    if(lives < 0){
          errorFile(token);
-      }
+   }
 
    suicideProcess->lives = lives;
 
    iss >> token;
    if(token.compare("}") != 0){
          errorFile(token);
-      }
+   }
 
    return suicideProcess;
 }
