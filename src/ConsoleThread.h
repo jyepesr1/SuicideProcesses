@@ -7,8 +7,9 @@ using namespace std;
 
 class ConsoleThread{
    private:
-      string path, id, name;
-      int lives;
+      SuicideProcess* suicideProcess;
+      //string path, id, name;
+      //int lives;
       thread consoleThread;
       void entry();
    public:

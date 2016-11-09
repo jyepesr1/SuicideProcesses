@@ -4,10 +4,11 @@
 #include <unistd.h>
 
 ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess){
-   this->path = suicideProcess->filePath;
-   this->id = suicideProcess->id;
-   this->lives = suicideProcess->lives;
-   this->name = suicideProcess->fileName;
+   //this->path = suicideProcess->filePath;
+   //this->id = suicideProcess->id;
+   //this->lives = suicideProcess->lives;
+   //this->name = suicideProcess->fileName;
+   this->suicideProcess = suicideProcess;
 }
 
 void ConsoleThread::createThread(){
@@ -17,7 +18,7 @@ void ConsoleThread::createThread(){
 }
 
 void ConsoleThread::entry(){
-   cout << "Thread: " << id << " Lives: " << lives << endl;
+   cout << "Thread: " << suicideProcess->id << " Lives: " << suicideProcess->lives << endl;
 }
 
 void ConsoleThread::join(){
