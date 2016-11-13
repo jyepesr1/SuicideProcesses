@@ -4,14 +4,19 @@ SRC_PATH=./src
 OUT_PATH=./bin
 FILES=main.cpp ControlConsole.cpp ConsoleThread.cpp
 OBJECTS=$(FILES:%.cpp=$(SRC_PATH)/%.o)
+FILES1=procesoctrl.cpp ControllerProcessAux.cpp
+OBJECTS1=$(FILES1:%.cpp=$(SRC_PATH)/%.o)
 
 all: conctrl procesoctrl
 
-procesoctrl: procesoctrl.o
-	$(CXX) -o $(SRC_PATH)/$@ $(SRC_PATH)/$< $(CXXFLAGS)
+procesoctrl: procesoctrl.o ControllerProcessAux.o
+	$(CXX) -o $(SRC_PATH)/$@ $(OBJECTS1) $(CXXFLAGS)
 
 procesoctrl.o: $(SRC_PATH)/ControllerProcess.cpp
 	$(CXX) -c $(CXXFLAGS) -I$(SRC_PATH) $< -o $(SRC_PATH)/$@
+	
+ControllerProcessAux.o: $(SRC_PATH)/ControllerProcessAux.cpp
+	$(CXX) -c $(CXXFLAGS) $< -o $(SRC_PATH)/$@
 
 conctrl: main.o ControlConsole.o ConsoleThread.o
 	$(CXX) -o $(SRC_PATH)/$@ $(OBJECTS) $(CXXFLAGS)

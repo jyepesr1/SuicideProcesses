@@ -13,7 +13,7 @@ class ConsoleThread{
       const int WRITE_END = 1;
       condition_variable cvRead, cvWrite;
       mutex mutRead, mutWrite;
-      string command;
+      string command, id, number;
       SuicideProcess* suicideProcess;
       pid_t pid;
       int fd[3][2];
@@ -26,7 +26,7 @@ class ConsoleThread{
       ConsoleThread(SuicideProcess* suicideProcesses);
       ~ConsoleThread();
       void createThread();
-      void callNotifyWrite(string command);
+      void callNotifyWrite(string command, string id, string number);
       void callNotifyRead(string command);
       void join();
 };

@@ -96,7 +96,7 @@ void ControlConsole::checkGrammar(string inputString){
          result = check(correctArgs, true);
          if(result){
             try {
-               consoleThreadsMap.at(id)->callNotifyWrite(inputString);
+               consoleThreadsMap.at(id)->callNotifyWrite(command, id, "");
                //this->waitNotify();
             }catch (const out_of_range& oor) {
                cerr << "Out of Range error: " << endl;

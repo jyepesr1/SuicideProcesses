@@ -68,21 +68,33 @@ void ConsoleThread::writeBuffer(){
    while(write1){
       cvWrite.wait(lockWrite);
       char com[1024];
+      char idP[1024];
+      char num[1024];
       strncpy(com, command.c_str(),sizeof(com));
+      strncpy(idP, id.c_str(),sizeof(idP));
+      strncpy(num, number.c_str(),sizeof(num));
       com[sizeof(com)-1] = 0;
+      idP[sizeof(idP)-1] = 0;
+      num[sizeof(num)-1] = 0;
       close(fd[1][READ_END]);
       FILE *stream;
       stream = fdopen(fd[1][WRITE_END], "w");
       fprintf(stream, "%s", com);
+      fprintf(stream, "\n");
+      fprintf(stream, "%s", idP);
+      fprintf(stream, "\n");
+      fprintf(stream, "%s", num);
       fprintf(stream, "\n");
       fclose(stream);
       cvRead.notify_one();
    }
 }
 
-void ConsoleThread::callNotifyWrite(string command){
+void ConsoleThread::callNotifyWrite(string command, string id, string number){
    unique_lock<mutex> lock(mutWrite);
    this->command = command;
+   this->id = id;
+   this->number = number;
    cvWrite.notify_one();
 }
 
