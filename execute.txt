@@ -1,0 +1,1 @@
+ ./conctrl --ficheroconfiguracion=./../examples/example.txt

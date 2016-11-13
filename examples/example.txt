@@ -1,2 +1,2 @@
 ProcesoSui primerSuicida { /home/fcardona/bin :: ProcesoSuicida 5 }
-ProcesoSui eternoSuicida { /usr/local/bin :: TendenciasSuicidas 0 }
+ProcesoSui eternoSuicida { /usr/local/bin :: TendenciasSuicidas 2 }

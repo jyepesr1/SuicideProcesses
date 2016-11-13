@@ -13,6 +13,8 @@ ControlConsole::ControlConsole(string routeConfigFile, string idSem, string idMe
    this->idSem = idSem;
    this->idMem = idMem;
 }
+ControlConsole::ControlConsole(){
+}
 
 void ControlConsole::createInterpreter(){
    string line;
@@ -59,10 +61,13 @@ void ControlConsole::error(){
         << endl;
 }
 
-void ControlConsole::check(bool correctArgs, bool isNumber){
+bool ControlConsole::check(bool correctArgs, bool isNumber){
    if(!(correctArgs == true && isNumber == true)){
       error();
+      return false; 
    }
+   
+   return true;
 }
 
 void ControlConsole::checkGrammar(string inputString){
@@ -83,11 +88,20 @@ void ControlConsole::checkGrammar(string inputString){
    code = commands.find(command)->second;
    count = countWords(inputString);
    bool isNumber = false, correctArgs = false;
+   bool result;
    switch(code){
       case 0:
          iss >> command >> id;
          correctArgs = checkArguments(count, 2);
-         check(correctArgs, true);
+         result = check(correctArgs, true);
+         if(result){
+            try {
+               consoleThreadsMap.at(id)->callNotifyWrite(inputString);
+               //this->waitNotify();
+            }catch (const out_of_range& oor) {
+               cerr << "Out of Range error: " << endl;
+            }
+         }
          break;
       case 1:
          iss >> command >> id >> number;
@@ -131,7 +145,29 @@ void ControlConsole::checkGrammar(string inputString){
          error();
          break;
    }
-   cout << "command: " << command << " id: " << id << " number: " << number << endl;
+}
+
+void ControlConsole::listar(string id, string inputString){
+   consoleThreadsMap.at(id)->callNotifyRead(inputString);
+}
+
+void ControlConsole::callNotify(){
+   //unique_lock<mutex> lock(mut);
+   this->notify = true;
+   condVar.notify_all();
+   cout << "notify_Out" << endl;
+}
+
+void ControlConsole::waitNotify(){
+   unique_lock<mutex> lc(mut);
+   cout << notify << endl;
+   //while(!notify){
+      //cout << notify << endl;
+      //condVar.wait(lock);
+   //}
+      condVar.wait(lc, [&](){ return notify;});
+      cout << "wait" << endl;
+
 }
 
 SuicideProcess* ControlConsole::getProcessInfo(string line){
@@ -211,8 +247,9 @@ void ControlConsole::createThreads(){
       it->second->createThread();
    }
 
-   for(auto it=consoleThreadsMap.begin(); it!=consoleThreadsMap.end(); ++it){
+  /* for(auto it=consoleThreadsMap.begin(); it!=consoleThreadsMap.end(); ++it){
       it->second->join();
-   }
+   }*/
 }
+
 

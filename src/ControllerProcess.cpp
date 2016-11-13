@@ -13,15 +13,31 @@ int main(int argc, char *argv[]){
       {"semaforo", no_argument, NULL, 's'},
       {NULL, 0, NULL, 0}
    };
-
+   string filepath, filename, lives;
    while((arg = getopt_long(argc, argv, "pnr:ms::", long_options, NULL)) != -1){
       switch(arg){
          case 'p':
-            cout << "filepath " << optarg << endl;
+            filepath = optarg;
+            break;
+         case 'n':
+            filename = optarg;
+            break;
+         case 'r':
+            lives = optarg;
             break;
          default:
-            cout << "sorry" << endl;
+            cout << "sorry " << endl;
             break;
       }
    }
+   
+   string line;
+   while(cin){
+      getline(cin, line);
+      getParams(line);
+   }
+}
+
+void getParams(string inputString){
+   
 }
