@@ -38,4 +38,5 @@ class ControlConsole{
       void callNotify();
       void listar(string id, string inputstring);
       void waitNotify();
+      void callThread(string command, string id, string number);
 };

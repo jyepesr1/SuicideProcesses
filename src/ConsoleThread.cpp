@@ -8,13 +8,16 @@
 #include <string.h>
 
 
-ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess){
+ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess, string idMem, string idSem){
    //this->path = suicideProcess->filePath;
    //this->id = suicideProcess->id;
    //this->lives = suicideProcess->lives;
    //this->name = suicideProcess->fileName;
    this->suicideProcess = suicideProcess;
+   this->idMem = idMem;
+   this->idSem = idSem;
    ConsoleThread::createControllerProcess();
+   
 }
 
 void ConsoleThread::createThread(){
@@ -28,9 +31,9 @@ void ConsoleThread::readBuffer(){
    while(isReading){
       unique_lock<mutex> lockRead(mutRead);
       bool read1 = true;
-      
       while(read1){
          cvRead.wait(lockRead);
+         
          close(fd[0][WRITE_END]);
          FILE *stream;
          int c;
@@ -39,21 +42,16 @@ void ConsoleThread::readBuffer(){
             putchar(c);
          }
          fclose(stream);
-         /*char line[1024];
-         while(fgets(line, sizeof(line), stream)){
-            printf("%s", line);
+         //char line[1024];
+         /*while(!feof(stream)){
+            if(fgets(line, sizeof(line), stream) == NULL) break;
+            fputs(line, stdout);
          }
-         fclose(stream);
-         cout << "line" << endl;*/
-         /*
-         if ((n = read(fd[0][READ_END], buf, 1)) >= 0) {
-            
-      	   buf[n] = 0;	 terminate the string 
-      	   cout << buf;
-      	}else{
-      	   //cerr << "error" << endl;
-      	   perror("read");
-      	}*/
+         
+         while(fgets(line, sizeof(line), stream)){
+            printf("%s\n", line);
+            fflush(stdout);
+         }*/
       }
       
       if(suicideProcess->lives == 0){
@@ -79,15 +77,13 @@ void ConsoleThread::writeBuffer(){
       close(fd[1][READ_END]);
       FILE *stream;
       stream = fdopen(fd[1][WRITE_END], "w");
-      fprintf(stream, "%s", com);
-      fprintf(stream, "\n");
-      fprintf(stream, "%s", idP);
-      fprintf(stream, "\n");
-      fprintf(stream, "%s", num);
-      fprintf(stream, "\n");
+      fprintf(stream, "%s\n", com);
+      fprintf(stream, "%s\n", idP);
+      fprintf(stream, "%s\n", num);
       fclose(stream);
       cvRead.notify_one();
    }
+   
 }
 
 void ConsoleThread::callNotifyWrite(string command, string id, string number){
@@ -106,13 +102,13 @@ void ConsoleThread::callNotifyRead(string command){
 
 void ConsoleThread::createControllerProcess(){
    cout << "Thread: " << suicideProcess->id << " Lives: " << suicideProcess->lives << endl;
-   pipe(fd[0]);
-   pipe(fd[1]);
-   pipe(fd[2]);;
-   pid = fork();
    string filePath = suicideProcess->filePath;
    string fileName = suicideProcess->fileName;
    string lives = to_string(suicideProcess->lives);
+   pipe(fd[0]);
+   pipe(fd[1]);
+   pipe(fd[2]);
+   pid = fork();
    switch(pid){
       case 0:
          close(fd[0][READ_END]);
@@ -121,14 +117,31 @@ void ConsoleThread::createControllerProcess(){
          dup2(fd[1][READ_END], STDIN_FILENO);
          close(fd[2][READ_END]);
          dup2(fd[2][WRITE_END], STDERR_FILENO);
+         /*close(fdin[WRITE_END]);
+         dup2(fdin[READ_END], READ_END);
+         close(fdout[READ_END]);
+         dup2(fdout[WRITE_END], WRITE_END);
+         cout << "into" << endl;
+         close(fd[1][WRITE_END]);
+         dup2(fd[1][READ_END], READ_END);
+         close(fd[0][READ_END]);
+         dup2(fd[0][WRITE_END], WRITE_END);
+         cout << "into" << endl;
+         
+         
+         
+         close(fd[1][READ_END]);
+         close(fd[2][READ_END]);
+         dup2(fd[2][WRITE_END], STDERR_FILENO);
+         close(fd[2][WRITE_END]);*/
          execl("./procesoctrl", "procesoctrl", "--filepath", filePath.c_str(), 
-         "--filename", fileName.c_str(), "--reencarnacion", lives.c_str(), NULL);
+         "--filename", fileName.c_str(), "--reencarnacion", lives.c_str(),
+         "--memoriacompartida", idMem.c_str(), "--semaforo", idSem.c_str(), NULL);
          break;
       case -1:
          cerr << "Error" << endl;
          break;
       default:
-         
          break;
          
    }

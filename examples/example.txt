@@ -1,2 +1,1 @@
-ProcesoSui primerSuicida { /home/fcardona/bin :: ProcesoSuicida 5 }
-ProcesoSui eternoSuicida { /usr/local/bin :: TendenciasSuicidas 2 }
+ProcesoSui segundoSuicida { /home/ubuntu/workspace/ProcesoSuicidaLinux/src :: ProcesoSuicida 5 }

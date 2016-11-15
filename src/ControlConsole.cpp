@@ -95,19 +95,17 @@ void ControlConsole::checkGrammar(string inputString){
          correctArgs = checkArguments(count, 2);
          result = check(correctArgs, true);
          if(result){
-            try {
-               consoleThreadsMap.at(id)->callNotifyWrite(command, id, "");
-               //this->waitNotify();
-            }catch (const out_of_range& oor) {
-               cerr << "Out of Range error: " << endl;
-            }
+            callThread(command, id, number);
          }
          break;
       case 1:
          iss >> command >> id >> number;
          isNumber = isaNumber(number);
          correctArgs = checkArguments(count, 3);
-         check(correctArgs, isNumber);
+         result = check(correctArgs, isNumber);
+         if(result){
+            callThread(command, id, number);
+         }
          break;
       case 2:
          iss >> command >> id >> number;
@@ -144,6 +142,15 @@ void ControlConsole::checkGrammar(string inputString){
       default:
          error();
          break;
+   }
+}
+
+void ControlConsole::callThread(string command, string id, string number){
+   try {
+      consoleThreadsMap.at(id)->callNotifyWrite(command, id, number);
+      //this->waitNotify();
+   }catch (const out_of_range& oor) {
+      cerr << "Out of Range error: " << endl;
    }
 }
 
@@ -234,7 +241,7 @@ void ControlConsole::readFile(string file){
    if (myfile.is_open()){
       while (getline(myfile,line)){
          SuicideProcess* suicideProcess = getProcessInfo(line);
-         consoleThreadsMap[suicideProcess->id] = new ConsoleThread(suicideProcess);
+         consoleThreadsMap[suicideProcess->id] = new ConsoleThread(suicideProcess, idMem, idSem);
       }
       myfile.close();
 

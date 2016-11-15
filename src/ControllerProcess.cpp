@@ -39,7 +39,7 @@ int main(int argc, char *argv[]){
       {"semaforo", no_argument, NULL, 's'},
       {NULL, 0, NULL, 0}
    };
-   string filepath, filename, lives;
+   string filepath, filename, lives, idMem, idSem;
    while((arg = getopt_long(argc, argv, "pnr:ms::", long_options, NULL)) != -1){
       switch(arg){
          case 'p':
@@ -51,17 +51,23 @@ int main(int argc, char *argv[]){
          case 'r':
             lives = optarg;
             break;
+         /*case 'm':
+            idMem = optarg;
+            break;
+         case 's':
+            idSem = optarg;
+            break;*/
          default:
             cout << "sorry " << endl;
             break;
       }
    }
    
+   ControllerProcessAux* controllerProcessAux = new ControllerProcessAux(filepath, filename, lives, idMem, idSem);
+   
    string command, id, number;
-   ControllerProcessAux* controllerProcessAux = new ControllerProcessAux(filepath, filename, lives, lives, lives);
    while(cin){
       getline(cin, command);
-      cout << "command "<< endl; 
       getline(cin, id);
       getline(cin, number);
       controllerProcessAux->getOperation(command, id, number);
