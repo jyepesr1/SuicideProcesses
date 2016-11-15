@@ -27,21 +27,36 @@ void ConsoleThread::createThread(){
 }
 
 void ConsoleThread::readBuffer(){
-   bool isReading =true;
-   while(isReading){
-      unique_lock<mutex> lockRead(mutRead);
+      //unique_lock<mutex> lockRead(mutRead);
       bool read1 = true;
+      //int rcontrol;
+      char buf[1025] = {0};;
       while(read1){
-         cvRead.wait(lockRead);
-         
+         //cvRead.wait(lockRead);
          close(fd[0][WRITE_END]);
          FILE *stream;
+         stream = fdopen (fd[0][READ_END], "r");
+         while(fgets(buf, sizeof(buf), stream)){
+            printf("<%s>", buf);
+            fflush(stream);
+         }
+         fclose(stream);
+         /*
+         cout << "read" << endl;
+         memset(buf, '\0', 1025);
+         while((rcontrol = read(fd[0][READ_END], buf, 1024)) > 0){
+            printf("<%s>", buf);
+            memset(buf, '\0', 1025);
+         }
+         close(fd[0][READ_END]);*/
+         /*FILE *stream;
          int c;
          stream = fdopen (fd[0][READ_END], "r");
          while((c = fgetc(stream)) != EOF){
             putchar(c);
          }
-         fclose(stream);
+         
+         fclose(stream);*/
          //char line[1024];
          /*while(!feof(stream)){
             if(fgets(line, sizeof(line), stream) == NULL) break;
@@ -53,16 +68,13 @@ void ConsoleThread::readBuffer(){
             fflush(stdout);
          }*/
       }
-      
-      if(suicideProcess->lives == 0){
-         isReading = false;
-      }
-   }
 }
 
 void ConsoleThread::writeBuffer(){
    unique_lock<mutex> lockWrite(mutWrite);
    bool write1 = true;
+   FILE *stream;
+   stream = fdopen(fd[1][WRITE_END], "w");
    while(write1){
       cvWrite.wait(lockWrite);
       char com[1024];
@@ -75,14 +87,16 @@ void ConsoleThread::writeBuffer(){
       idP[sizeof(idP)-1] = 0;
       num[sizeof(num)-1] = 0;
       close(fd[1][READ_END]);
-      FILE *stream;
-      stream = fdopen(fd[1][WRITE_END], "w");
+      //FILE *stream;
+      //stream = fdopen(fd[1][WRITE_END], "w");
       fprintf(stream, "%s\n", com);
       fprintf(stream, "%s\n", idP);
       fprintf(stream, "%s\n", num);
-      fclose(stream);
-      cvRead.notify_one();
+      fflush(stream);
+      //fclose(stream);
+      //cvRead.notify_one();
    }
+   fclose(stream);
    
 }
 
@@ -111,32 +125,25 @@ void ConsoleThread::createControllerProcess(){
    pid = fork();
    switch(pid){
       case 0:
-         
          close(fd[0][READ_END]);
+         dup2(fd[0][WRITE_END], WRITE_END);
+         close(fd[1][WRITE_END]);
+         dup2(fd[1][READ_END], READ_END);
+         /*close(fd[0][READ_END]);
          dup2(fd[0][WRITE_END], STDOUT_FILENO);
          close(fd[1][WRITE_END]);
          dup2(fd[1][READ_END], STDIN_FILENO);
          close(fd[2][READ_END]);
          dup2(fd[2][WRITE_END], STDERR_FILENO);
          
-         
-         /*close(fdin[WRITE_END]);
+         close(fdin[WRITE_END]);
          dup2(fdin[READ_END], READ_END);
          close(fdout[READ_END]);
-         dup2(fdout[WRITE_END], WRITE_END);
-         cout << "into" << endl;
-         close(fd[1][WRITE_END]);
-         dup2(fd[1][READ_END], READ_END);
-         close(fd[0][READ_END]);
-         dup2(fd[0][WRITE_END], WRITE_END);
-         cout << "into" << endl;
-         close(fd[1][READ_END]);
-         close(fd[2][READ_END]);
-         dup2(fd[2][WRITE_END], STDERR_FILENO);
-         close(fd[2][WRITE_END]);*/
+         dup2(fdout[WRITE_END], WRITE_END);*/
          execl("./procesoctrl", "procesoctrl", "--filepath", filePath.c_str(), 
          "--filename", fileName.c_str(), "--reencarnacion", lives.c_str(),
          "--memoriacompartida", idMem.c_str(), "--semaforo", idSem.c_str(), NULL);
+         cerr << "Error" << endl;
          break;
       case -1:
          cerr << "Error" << endl;

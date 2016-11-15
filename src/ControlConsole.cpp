@@ -72,7 +72,7 @@ bool ControlConsole::check(bool correctArgs, bool isNumber){
 
 void ControlConsole::checkGrammar(string inputString){
    map<string, int> commands;
-   string command, id, number;
+   string command, id, number = "";
    int count = 0, code = -1;
    commands["listar"] = 0;
    commands["sumar"] = 1;
@@ -94,18 +94,12 @@ void ControlConsole::checkGrammar(string inputString){
          iss >> command >> id;
          correctArgs = checkArguments(count, 2);
          result = check(correctArgs, true);
-         if(result){
-            callThread(command, id, number);
-         }
          break;
       case 1:
          iss >> command >> id >> number;
          isNumber = isaNumber(number);
          correctArgs = checkArguments(count, 3);
          result = check(correctArgs, isNumber);
-         if(result){
-            callThread(command, id, number);
-         }
          break;
       case 2:
          iss >> command >> id >> number;
@@ -142,6 +136,9 @@ void ControlConsole::checkGrammar(string inputString){
       default:
          error();
          break;
+   }
+   if(result){
+      callThread(command, id, number);
    }
 }
 

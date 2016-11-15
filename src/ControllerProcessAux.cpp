@@ -21,17 +21,27 @@ void ControllerProcessAux::readBuffer(){
 }
 
 void ControllerProcessAux::createSuicideProcess(){
+    cout << "Creating suicide process" << endl;
     pipe(f);
     pid = fork();
     string executable = filePath + "/" + fileName;
     switch(pid){
-        case 0://Child
-            
-            cout << "Creating suicide process"<< endl;
+        case 0:
+            close(f[0]);
+            dup2(f[1], 1);
             execl(executable.c_str(), fileName.c_str(), NULL);
             cout << "Error" << endl;
             break;
         default:
+            /*close(f[1]);
+            dup2(f[0], 0);
+            cout << "R" << endl;
+            char c;
+            c = cin.get();
+            while(cin){
+                cout << c;
+                c = cin.get();
+            }*/
             while(lives > 0){
                 int childStatus;
                 waitpid(pid, &childStatus, 0);
@@ -41,8 +51,7 @@ void ControllerProcessAux::createSuicideProcess(){
             }
             //readBuffer();
             break;
-        case -1:
-            cerr << "Occurs a problem creating suicideProcess" << endl;
+            
     }
 }
 
@@ -100,11 +109,11 @@ void ControllerProcessAux::list(){
 void ControllerProcessAux::sum(int num){
     this->lives = this->lives + num;
     cout << "Suicide process " << fileName << " has added " << num << 
-    " lives -- Controller process " << getpid() << ", remaining lives "<< lives << endl;
+    " lives -- Controller process " << getpid() << ", remaining lives "<< lives << "\0" << endl;
 }
 
 void ControllerProcessAux::sub(int num){
-    this->lives = this->lives + num;
+    this->lives = this->lives - num;
     cout << "Suicide process " << fileName << " has lost " << num << 
     " lives -- Controller process " << getpid() << ", remaining lives "<< lives << endl;
 }

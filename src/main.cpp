@@ -35,7 +35,7 @@ int main(int argc, const char *argv[]){
    string idSem;
    string idMem;
 
-   if(argc >= 4){
+   if(argc > 4){
       showUsage();
    }
 

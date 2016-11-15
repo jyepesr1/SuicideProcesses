@@ -35,8 +35,8 @@ int main(int argc, char *argv[]){
       {"filepath", required_argument, NULL, 'p'},
       {"filename", required_argument, NULL, 'n'},
       {"reencarnacion", required_argument, NULL, 'r'},
-      {"memoriacompartida", no_argument, NULL, 'm'},
-      {"semaforo", no_argument, NULL, 's'},
+      {"memoriacompartida", required_argument, NULL, 'm'},
+      {"semaforo", required_argument, NULL, 's'},
       {NULL, 0, NULL, 0}
    };
    string filepath, filename, lives, idMem, idSem;
@@ -51,14 +51,14 @@ int main(int argc, char *argv[]){
          case 'r':
             lives = optarg;
             break;
-         /*case 'm':
+         case 'm':
             idMem = optarg;
             break;
          case 's':
             idSem = optarg;
-            break;*/
+            break;
          default:
-            cout << "sorry " << endl;
+            cout << "Bad argument " << endl;
             break;
       }
    }
