@@ -3,6 +3,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 ControllerProcessAux::ControllerProcessAux(string filePath, string fileName, string lives, string idMem, string idSem){
     this->filePath = filePath;
@@ -10,7 +11,7 @@ ControllerProcessAux::ControllerProcessAux(string filePath, string fileName, str
     this->lives = stoi(lives);
     this->idMem = idMem;
     this->idSem = idSem;
-    //createSuicideProcess();
+    createSuicideProcess();
 }
 
 void ControllerProcessAux::readBuffer(){
@@ -25,11 +26,19 @@ void ControllerProcessAux::createSuicideProcess(){
     string executable = filePath + "/" + fileName;
     switch(pid){
         case 0://Child
+            
             cout << "Creating suicide process"<< endl;
             execl(executable.c_str(), fileName.c_str(), NULL);
             cout << "Error" << endl;
             break;
         default:
+            while(lives > 0){
+                int childStatus;
+                waitpid(pid, &childStatus, 0);
+                lives--;
+                cout << "Suicide process " << fileName << " ended because of " << childStatus << 
+                " -- Controller process " << getpid() << ", remaining lives "<< lives << endl;
+            }
             //readBuffer();
             break;
         case -1:

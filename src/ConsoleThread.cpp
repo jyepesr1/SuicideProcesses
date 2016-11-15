@@ -111,12 +111,15 @@ void ConsoleThread::createControllerProcess(){
    pid = fork();
    switch(pid){
       case 0:
+         
          close(fd[0][READ_END]);
          dup2(fd[0][WRITE_END], STDOUT_FILENO);
          close(fd[1][WRITE_END]);
          dup2(fd[1][READ_END], STDIN_FILENO);
          close(fd[2][READ_END]);
          dup2(fd[2][WRITE_END], STDERR_FILENO);
+         
+         
          /*close(fdin[WRITE_END]);
          dup2(fdin[READ_END], READ_END);
          close(fdout[READ_END]);
@@ -127,9 +130,6 @@ void ConsoleThread::createControllerProcess(){
          close(fd[0][READ_END]);
          dup2(fd[0][WRITE_END], WRITE_END);
          cout << "into" << endl;
-         
-         
-         
          close(fd[1][READ_END]);
          close(fd[2][READ_END]);
          dup2(fd[2][WRITE_END], STDERR_FILENO);
