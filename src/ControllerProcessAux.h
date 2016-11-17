@@ -1,10 +1,12 @@
 #pragma once
 #include <string>
-
+#include <thread>
 using namespace std;
 
 class ControllerProcessAux{
     private:
+        thread suicide;
+        bool INFINITE = false;
         string filePath, fileName, idMem, idSem;
         int lives;
         pid_t pid;

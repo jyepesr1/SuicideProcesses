@@ -6,6 +6,7 @@
 #include "ControlConsole.h"
 #include <stdio.h>
 #include <string.h>
+#include <fstream>
 
 
 ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess, string idMem, string idSem){
@@ -36,11 +37,13 @@ void ConsoleThread::readBuffer(){
          close(fd[0][WRITE_END]);
          FILE *stream;
          stream = fdopen (fd[0][READ_END], "r");
+         
          while(fgets(buf, sizeof(buf), stream)){
-            printf("<%s>", buf);
+            printf("%s", buf);
             fflush(stream);
          }
          fclose(stream);
+         
          /*
          cout << "read" << endl;
          memset(buf, '\0', 1025);

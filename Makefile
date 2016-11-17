@@ -37,3 +37,4 @@ clean:
 	rm $(SRC_PATH)/*.o
 	rm $(SRC_PATH)/conctrl
 	rm $(SRC_PATH)/procesoctrl
+	rm $(SRC_PATH)/log.txt
