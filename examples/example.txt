@@ -1,2 +1,2 @@
-ProcesoSui primerSuicida { //home/ubuntu/workspace/ProcesoSuicidaLinux/src :: suicide 10 }
+ProcesoSui primerSuicida { /home/ubuntu/workspace/ProcesoSuicidaLinux/src :: suicide 10 }
 ProcesoSui segundoSuicida { /home/ubuntu/workspace/ProcesoSuicidaLinux/src :: ProcesoSuicida 5 }

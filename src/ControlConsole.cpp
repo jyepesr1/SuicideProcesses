@@ -143,11 +143,18 @@ void ControlConsole::checkGrammar(string inputString){
 }
 
 void ControlConsole::callThread(string command, string id, string number){
-   try {
-      consoleThreadsMap.at(id)->callNotifyWrite(command, id, number);
-      //this->waitNotify();
-   }catch (const out_of_range& oor) {
-      cerr << "Out of Range error: " << endl;
+   if(id == "*"){
+      for(auto it=consoleThreadsMap.begin(); it!=consoleThreadsMap.end(); ++it){
+         //cout << it->first;
+         it->second->callNotifyWrite(command,it->first, number);
+      }
+   }else{
+      try {
+         consoleThreadsMap.at(id)->callNotifyWrite(command, id, number);
+         //this->waitNotify();
+      }catch (const out_of_range& oor) {
+         cerr << "Out of Range error: " << endl;
+      }  
    }
 }
 

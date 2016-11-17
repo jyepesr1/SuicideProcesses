@@ -27,9 +27,15 @@ void ControllerProcessAux::readBuffer(){
 }
 
 void ControllerProcessAux::createSuicideProcess(){
+    unique_lock<mutex> lock(mutExecution);
     cout << "Creating " << fileName  << endl;
     pipe(f);
     while(lives > 0 || INFINITE){
+        while(!executionStatus){
+            cout << "Stop here "<< lives << endl;
+            executionVar.wait(lock);
+            cout << "continue here " << lives << endl;
+        }
         pid = fork();
         string executable = filePath + "/" + fileName;
         switch(pid){
@@ -117,7 +123,7 @@ void ControllerProcessAux::list(){
          << "\tId memory: " << idMem << "\n"
          << "\tId semaphore: " << idSem << "\n";
     if(INFINITE){
-        cout << "\tLives: Infinite." << endl;
+        cout << "\tLives: Infinite" << endl;
     }else{
         cout << "\tLives: " << lives << endl;
     }
@@ -136,22 +142,25 @@ void ControllerProcessAux::sum(int num){
 
 void ControllerProcessAux::sub(int num){
     if(INFINITE){
-            cout << "Suicide process " << fileName << " couldn't lose lives "
-            " -- Controller process " << getpid() << ", remaining lives: Infinite" << endl;
-        }else{
-            this->lives = this->lives - num;
-            cout << "Suicide process " << fileName << " has lost " << num << 
-            " lives -- Controller process " << getpid() << ", remaining lives "<< lives << endl;
-        }
-
+        cout << "Suicide process " << fileName << " couldn't lose lives "
+        " -- Controller process " << getpid() << ", remaining lives: Infinite" << endl;
+    }else{
+        this->lives = this->lives - num;
+        cout << "Suicide process " << fileName << " has lost " << num << 
+        " lives -- Controller process " << getpid() << ", remaining lives "<< lives << endl;
+    }
 }
 
 void ControllerProcessAux::suspend(){
+    executionStatus = false;
     cout << "Suicide process " << fileName << " has been suspended " <<
     " -- Controller process " << getpid() << ", remaining lives: "<< lives << endl;
 }
 
 void ControllerProcessAux::restore(){
+    unique_lock<mutex> lock(mutExecution);
+    executionStatus = true;
+    executionVar.notify_one();
     cout << "Suicide process " << fileName << " has been restored " <<
     " -- Controller process " << getpid() << ", remaining lives: "<< lives << endl;
 }
@@ -177,5 +186,6 @@ void ControllerProcessAux::define(int num){
     " -- Controller process " << getpid() << ", remaining lives "<< lives << endl;
 }
 void ControllerProcessAux::end(){
-    cout << "Suicide process " << fileName << " has been ended " << endl;
+    cout << "Controller process " << getpid() << " ended " << endl;
+    kill(getpid(), SIGKILL);
 }

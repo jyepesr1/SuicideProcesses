@@ -1,12 +1,17 @@
 #pragma once
 #include <string>
 #include <thread>
+#include <condition_variable>
+#include <mutex>
+
 using namespace std;
 
 class ControllerProcessAux{
     private:
         thread suicide;
-        bool INFINITE = false;
+        bool INFINITE = false, executionStatus = true;
+        mutex mutExecution;
+        condition_variable executionVar;
         string filePath, fileName, idMem, idSem;
         int lives;
         pid_t pid;
