@@ -22,7 +22,8 @@ class ConsoleThread{
       const int WRITE_END = 1;
       condition_variable cvRead, cvWrite;
       mutex mutRead, mutWrite;
-      string command, id, number, idSem, idMem;
+      string command, id, number, idSem;
+      int idMem;
       SuicideProcess* suicideProcess;
       pid_t pid;
       int fdin[2], fdout[2];
@@ -34,11 +35,12 @@ class ConsoleThread{
       void readBuffer();
       void writeBuffer();
       void waitDeath();
+      void joinThreads();
+      
    public:
-      ConsoleThread(SuicideProcess* suicideProcesses, string idMem, string idSem);
+      ConsoleThread(SuicideProcess* suicideProcesses, int idMem, string idSem);
       ~ConsoleThread();
       void createThread();
       void callNotifyWrite(string command, string id, string number);
       void callNotifyRead(string command);
-      void join();
 };

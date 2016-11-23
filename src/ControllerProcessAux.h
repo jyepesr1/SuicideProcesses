@@ -21,7 +21,7 @@ class ControllerProcessAux{
         const int WRITE_END = 1;
         const size_t MAX = 2048;
     public:
-        ControllerProcessAux(string filePath, string fileName, string lives, string idMem, string idSem);
+        ControllerProcessAux(string filePath, string fileName, string lives, int idMem, string idSem);
         void readBuffer();
         void getOperation(string command, string id, string number);
         void createSuicideProcess();

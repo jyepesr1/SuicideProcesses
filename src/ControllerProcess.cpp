@@ -39,7 +39,8 @@ int main(int argc, char *argv[]){
       {"semaforo", required_argument, NULL, 's'},
       {NULL, 0, NULL, 0}
    };
-   string filepath, filename, lives, idMem, idSem;
+   string filepath, filename, lives, idSem;
+   int idMem;
    while((arg = getopt_long(argc, argv, "pnr:ms::", long_options, NULL)) != -1){
       switch(arg){
          case 'p':
@@ -52,7 +53,7 @@ int main(int argc, char *argv[]){
             lives = optarg;
             break;
          case 'm':
-            idMem = optarg;
+            idMem = stoi(optarg);
             break;
          case 's':
             idSem = optarg;

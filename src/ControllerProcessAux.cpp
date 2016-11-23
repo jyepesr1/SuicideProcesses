@@ -8,7 +8,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-ControllerProcessAux::ControllerProcessAux(string filePath, string fileName, string lives, string idMem, string idSem){
+ControllerProcessAux::ControllerProcessAux(string filePath, string fileName, string lives, int idMem, string idSem){
     this->filePath = filePath;
     this->fileName = fileName;
     this->lives = stoi(lives);
@@ -210,7 +210,10 @@ void ControllerProcessAux::end(){
 }
 
 void ControllerProcessAux::writeSharedMemory(){
-    key_t key = stoi(idMem);
+    
+    
+    
+    /*key_t key = stoi(idMem);
     int shmid;
     int *shm;
     if ((shmid = shmget(key, MAX, IPC_CREAT | 0666)) < 0) {
@@ -224,5 +227,5 @@ void ControllerProcessAux::writeSharedMemory(){
     for(int i = 0; i < 10; i++){
         cout << i << endl;
         *shm = i;
-    }
+    }*/
 }

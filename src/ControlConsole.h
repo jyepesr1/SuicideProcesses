@@ -5,6 +5,7 @@
 #include<thread>
 #include "ConsoleThread.h"
 #include "suicideProcessStruct.h"
+#include "MemoriaCompartida.h"
 #include <condition_variable>
 #include <mutex>
 #include <stdio.h>
@@ -12,6 +13,8 @@
 #include <sstream>
 #include <fstream>
 #include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 using namespace std;
 
@@ -19,7 +22,7 @@ class ControlConsole{
    private:
       string routeConfigFile;
       string idSem;
-      string idMem;
+      int idMem;
       mutex mut;
       map<string,ConsoleThread*> consoleThreadsMap;
       thread controlConsoleThreadCheckControllerProcesses;
@@ -27,7 +30,7 @@ class ControlConsole{
    public:
       condition_variable condVar;
       bool notify = false;
-      ControlConsole(string routeConfigFile, string idSem, string idMem);
+      ControlConsole(string routeConfigFile, string idSem, int idMem);
       ControlConsole();
       void createThreads();
       int countWords(string inputstring);
@@ -45,5 +48,6 @@ class ControlConsole{
       void waitNotify();
       void callThread(string command, string id, string number);
       void checkControllerProcesses();
-//      static int controllerProcessesAlive;
+      void createSharedMemory();
+      void readSharedMemory();
 };

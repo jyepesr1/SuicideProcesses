@@ -15,7 +15,7 @@ void showUsage(){
    exit(1);
 }
 
-void split(string argument, string& routeConfigFile, string& idSem, string& idMem){
+void split(string argument, string& routeConfigFile, string& idSem, int& idMem){
    int pos = argument.find("=");
    string key = argument.substr(0,pos);
    string value = argument.substr(pos+1);
@@ -24,7 +24,7 @@ void split(string argument, string& routeConfigFile, string& idSem, string& idMe
    }else if(key == "--semaforo"){
       idSem = value;
    }else if(key == "--memoriacompartida"){
-      idMem = value;
+      idMem = stoi(value);
    }else{
       showUsage();
    }
@@ -33,7 +33,7 @@ void split(string argument, string& routeConfigFile, string& idSem, string& idMe
 int main(int argc, const char *argv[]){
    string routeConfigFile;
    string idSem;
-   string idMem;
+   int idMem;
 
    if(argc > 4){
       showUsage();
@@ -51,9 +51,17 @@ int main(int argc, const char *argv[]){
       idSem = "conctrlsem";
    }
 
-   if(idMem == ""){
-      idMem = "conctrlmem";
+   if(to_string(idMem) == ""){
+      string line;
+      ifstream myfile ("conctrlmem");
+      if (myfile.is_open()){
+         while (getline(myfile,line)){
+            idMem = stoi(line);
+         }
+         myfile.close();
+      }else cout << "Unable to open file"; 
    }
+   
    ControlConsole controlConsole(routeConfigFile, idSem, idMem);
    controlConsole.readFile(routeConfigFile);
    controlConsole.createInterpreter();

@@ -2,7 +2,7 @@
 
 extern int controllerProcessesAlive;
 
-ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess, string idMem, string idSem){
+ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess, int idMem, string idSem){
    //this->path = suicideProcess->filePath;
    //this->id = suicideProcess->id;
    //this->lives = suicideProcess->lives;
@@ -107,7 +107,7 @@ void ConsoleThread::createControllerProcess(){
          dup2(fdout[WRITE_END], WRITE_END);*/
          execl("./procesoctrl", "procesoctrl", "--filepath", filePath.c_str(), 
          "--filename", fileName.c_str(), "--reencarnacion", lives.c_str(),
-         "--memoriacompartida", idMem.c_str(), "--semaforo", idSem.c_str(), NULL);
+         "--memoriacompartida", to_string(idMem).c_str(), "--semaforo", idSem.c_str(), NULL);
          cerr << "Error" << endl;
          break;
       case -1:
@@ -120,14 +120,15 @@ void ConsoleThread::createControllerProcess(){
    
 }
 
-void ConsoleThread::join(){
+void ConsoleThread::joinThreads(){
    consoleThreadRead.join();
    consoleThreadWrite.join();
+   consoleThreadWaitControllerProcessDeath.join();
 }
 
 void ConsoleThread::waitDeath(){
    int childStatus;
    waitpid(pid, &childStatus, 0);
    controllerProcessesAlive--;
-   
+   joinThreads();
 }
