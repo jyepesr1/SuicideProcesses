@@ -299,8 +299,13 @@ void ControlConsole::createSharedMemory(){
       exit(1); 
    }
    
+   sharedMemory->muertes = (InfoMuerte* )(sharedMemory + 1);
+   sharedMemory->muertes[0].nDecesos = 3;
+   strcpy(sharedMemory->muertes[0].id, "hola");
+   sharedMemory->muertes[1].nDecesos = 90;
+   strcpy(sharedMemory->muertes[1].id, "chao");
    sharedMemory->valSeq = 7;
-      
+   
    /* Free the shared memory */
 }
 
@@ -326,7 +331,8 @@ void ControlConsole::readSharedMemory(){
    }
    
    printf("%ld\n", sharedMemory->valSeq);
-   
+   printf("%s\n", sharedMemory->muertes[0].id);
+   printf("%s\n", sharedMemory->muertes[1].id);
    shmdt ((char *)sharedMemory);
    shmctl (id_MemZone, IPC_RMID, (struct shmid_ds *)NULL);
    exit(0);
