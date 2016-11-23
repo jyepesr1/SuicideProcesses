@@ -1,12 +1,8 @@
 #include "ControlConsole.h"
-#include <stdio.h>
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <string>
-#include <map>
-#include <stdlib.h>
+
 using namespace std;
+
+int controllerProcessesAlive;
 
 ControlConsole::ControlConsole(string routeConfigFile, string idSem, string idMem){
    this->routeConfigFile = routeConfigFile;
@@ -21,6 +17,9 @@ void ControlConsole::createInterpreter(){
    while(cin){
       cout << "conctrl> ";
       getline(cin, line);
+      if(line.length() == 0){
+         exit(EXIT_SUCCESS);
+      }
       checkGrammar(line);
    }
 
@@ -88,7 +87,7 @@ void ControlConsole::checkGrammar(string inputString){
    code = commands.find(command)->second;
    count = countWords(inputString);
    bool isNumber = false, correctArgs = false;
-   bool result;
+   bool result = false;
    switch(code){
       case 0:
          iss >> command >> id;
@@ -105,33 +104,33 @@ void ControlConsole::checkGrammar(string inputString){
          iss >> command >> id >> number;
          isNumber = isaNumber(number);
          correctArgs = checkArguments(count, 3);
-         check(correctArgs, isNumber);
+         result = check(correctArgs, isNumber);
          break;
       case 3:
          iss >> command >> id;
          correctArgs = checkArguments(count, 2);
-         check(correctArgs, true);
+         result = check(correctArgs, true);
          break;
       case 4:
          iss >> command >> id;
          correctArgs = checkArguments(count, 2);
-         check(correctArgs, true);
+         result = check(correctArgs, true);
          break;
       case 5:
          iss >> command >> id;
          correctArgs = checkArguments(count, 2);
-         check(correctArgs, true);
+         result = check(correctArgs, true);
          break;
       case 6:
          iss >> command >> id >> number;
          isNumber = isaNumber(number);
          correctArgs = checkArguments(count, 3);
-         check(correctArgs, isNumber);
+         result = check(correctArgs, isNumber);
          break;
       case 7:
          iss >> command >> id;
          correctArgs = checkArguments(count, 2);
-         check(correctArgs, true);
+         result = check(correctArgs, true);
          break;
       default:
          error();
@@ -139,19 +138,25 @@ void ControlConsole::checkGrammar(string inputString){
    }
    if(result){
       callThread(command, id, number);
+      //this->waitNotify();
    }
 }
 
 void ControlConsole::callThread(string command, string id, string number){
    if(id == "*"){
-      for(auto it=consoleThreadsMap.begin(); it!=consoleThreadsMap.end(); ++it){
-         //cout << it->first;
-         it->second->callNotifyWrite(command,it->first, number);
+      try{
+         for(auto it=consoleThreadsMap.begin(); it!=consoleThreadsMap.end(); ++it){
+            //cout << it->first;
+            it->second->callNotifyWrite(command,it->first, number);
+            if(command == "terminar") exit(1);
+         }
+      }catch(const out_of_range& oor){
+         cerr << "Out of Range error" << endl;
       }
    }else{
       try {
          consoleThreadsMap.at(id)->callNotifyWrite(command, id, number);
-         //this->waitNotify();
+         if(command == "terminar") consoleThreadsMap.erase(id);
       }catch (const out_of_range& oor) {
          cerr << "Out of Range error: " << endl;
       }  
@@ -170,14 +175,13 @@ void ControlConsole::callNotify(){
 }
 
 void ControlConsole::waitNotify(){
-   unique_lock<mutex> lc(mut);
-   cout << notify << endl;
-   //while(!notify){
-      //cout << notify << endl;
-      //condVar.wait(lock);
-   //}
-      condVar.wait(lc, [&](){ return notify;});
-      cout << "wait" << endl;
+   unique_lock<mutex> lock(mut);
+   while(!notify){
+      cout << notify << endl;
+      condVar.wait(lock);
+   }
+   //condVar.wait(lc, [&](){ return notify;});
+   cout << "wait" << endl;
 
 }
 
@@ -249,6 +253,7 @@ void ControlConsole::readFile(string file){
       }
       myfile.close();
 
+      controlConsoleThreadCheckControllerProcesses = thread(&ControlConsole::checkControllerProcesses, this);
       createThreads();
    }else cout << "Unable to open file" << endl;
 }
@@ -262,5 +267,12 @@ void ControlConsole::createThreads(){
       it->second->join();
    }*/
 }
+
+void ControlConsole::checkControllerProcesses(){
+   controllerProcessesAlive = consoleThreadsMap.size();
+   while(controllerProcessesAlive != 0);
+   exit(0);
+}
+
 
 

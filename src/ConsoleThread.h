@@ -1,9 +1,18 @@
 #pragma once
+
 #include<string>
 #include<thread>
 #include "suicideProcessStruct.h"
 #include <condition_variable>
 #include <mutex>
+#include <iostream>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <stdio.h>
+#include <string.h>
+#include <fstream>
 
 using namespace std;
 
@@ -20,9 +29,11 @@ class ConsoleThread{
       int fd[3][2];
       thread consoleThreadRead;
       thread consoleThreadWrite;
+      thread consoleThreadWaitControllerProcessDeath;
       void createControllerProcess();
       void readBuffer();
       void writeBuffer();
+      void waitDeath();
    public:
       ConsoleThread(SuicideProcess* suicideProcesses, string idMem, string idSem);
       ~ConsoleThread();

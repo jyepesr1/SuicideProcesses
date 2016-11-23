@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <fstream>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 ControllerProcessAux::ControllerProcessAux(string filePath, string fileName, string lives, string idMem, string idSem){
     this->filePath = filePath;
@@ -28,18 +30,19 @@ void ControllerProcessAux::readBuffer(){
 
 void ControllerProcessAux::createSuicideProcess(){
     unique_lock<mutex> lock(mutExecution);
-    cout << "Creating " << fileName  << endl;
-    pipe(f);
+    //pipe(fd[0]);
     while(lives > 0 || INFINITE){
         while(!executionStatus){
-            cout << "Stop here "<< lives << endl;
             executionVar.wait(lock);
-            cout << "continue here " << lives << endl;
         }
         pid = fork();
         string executable = filePath + "/" + fileName;
         switch(pid){
             case 0:
+      /*          close(fd[0][READ_END]);
+                dup2(fd[0][WRITE_END], WRITE_END);
+                close(fd[1][WRITE_END]);
+                dup2(fd[1][READ_END], READ_END);*/
                 execl(executable.c_str(), fileName.c_str(), NULL);
                 cout << "Error" << endl;
                 break;
@@ -51,11 +54,22 @@ void ControllerProcessAux::createSuicideProcess(){
                     lives--;
                     outputFile << "Suicide process " << fileName << " ended because of " << childStatus << 
                     " -- Controller process " << getpid() << ", remaining lives: "<< lives << endl;
+                    
+                    cout << "Suicide process " << fileName << " ended because of " << childStatus << 
+                    " -- Controller process " << getpid() << ", remaining lives: "<< lives << endl;
+                    
                 }else{
                     outputFile << "Suicide process " << fileName << " ended because of " << childStatus << 
                     " -- Controller process " << getpid() << ", remaining lives: Infinite " << endl;
+                    
+                    cout << "Suicide process " << fileName << " ended because of " << childStatus << 
+                    " -- Controller process " << getpid() << ", remaining lives: Infinite " << endl;
+                    
                 }
                 outputFile.close();
+                if(lives == 0 && !INFINITE){
+                    end();
+                }
                 break;
                 /*while(lives > 0){
                     int childStatus;
@@ -117,15 +131,15 @@ void ControllerProcessAux::getOperation(string command, string id, string number
 
 
 void ControllerProcessAux::list(){
-    cout << "Controller process " << getpid() << "\n"
-         << "\tSuicide process " << fileName << "\n"
-         << "\tFile path: " << filePath << "\n"
-         << "\tId memory: " << idMem << "\n"
-         << "\tId semaphore: " << idSem << "\n";
+    cout << "Controller process " << getpid() << ": "
+         << "Suicide process " << fileName << ", "
+         << "File path: " << filePath << ", "
+         << "Id memory: " << idMem << ", "
+         << "Id semaphore: " << idSem << ", ";
     if(INFINITE){
-        cout << "\tLives: Infinite" << endl;
+        cout << "Lives: Infinite" << endl;
     }else{
-        cout << "\tLives: " << lives << endl;
+        cout << "Lives: " << lives << endl;
     }
 }
 
@@ -187,5 +201,28 @@ void ControllerProcessAux::define(int num){
 }
 void ControllerProcessAux::end(){
     cout << "Controller process " << getpid() << " ended " << endl;
-    kill(getpid(), SIGKILL);
+    try{
+        //kill(getpid(), SIGKILL);
+        exit(1);
+    }catch(int &z){
+        cout << "Troubles" << endl;
+    }
+}
+
+void ControllerProcessAux::writeSharedMemory(){
+    key_t key = stoi(idMem);
+    int shmid;
+    int *shm;
+    if ((shmid = shmget(key, MAX, IPC_CREAT | 0666)) < 0) {
+        cerr<<"shmget";
+        exit(1);
+    }
+    if ((shm = (int *)shmat(shmid, 0, 0)) == (int *) -1) {
+        cerr<<"shmat";
+        exit(1);
+    }
+    for(int i = 0; i < 10; i++){
+        cout << i << endl;
+        *shm = i;
+    }
 }

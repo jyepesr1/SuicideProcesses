@@ -1,13 +1,6 @@
-#include <iostream>
-#include <stdlib.h>
 #include "ConsoleThread.h"
-#include <unistd.h>
-#include <sys/types.h>
-#include "ControlConsole.h"
-#include <stdio.h>
-#include <string.h>
-#include <fstream>
 
+extern int controllerProcessesAlive;
 
 ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess, string idMem, string idSem){
    //this->path = suicideProcess->filePath;
@@ -22,55 +15,24 @@ ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess, string idMem, strin
 }
 
 void ConsoleThread::createThread(){
-   cout << "In main: creating thread" << endl;
    consoleThreadRead = thread(&ConsoleThread::readBuffer, this);
    consoleThreadWrite = thread(&ConsoleThread::writeBuffer, this);
+   consoleThreadWaitControllerProcessDeath = thread(&ConsoleThread::waitDeath, this);
 }
 
 void ConsoleThread::readBuffer(){
       //unique_lock<mutex> lockRead(mutRead);
-      bool read1 = true;
-      //int rcontrol;
-      char buf[1025] = {0};;
-      while(read1){
-         //cvRead.wait(lockRead);
-         close(fd[0][WRITE_END]);
-         FILE *stream;
-         stream = fdopen (fd[0][READ_END], "r");
-         
-         while(fgets(buf, sizeof(buf), stream)){
-            printf("%s", buf);
-            fflush(stream);
-         }
-         fclose(stream);
-         
-         /*
-         cout << "read" << endl;
-         memset(buf, '\0', 1025);
-         while((rcontrol = read(fd[0][READ_END], buf, 1024)) > 0){
-            printf("<%s>", buf);
-            memset(buf, '\0', 1025);
-         }
-         close(fd[0][READ_END]);*/
-         /*FILE *stream;
-         int c;
-         stream = fdopen (fd[0][READ_END], "r");
-         while((c = fgetc(stream)) != EOF){
-            putchar(c);
-         }
-         
-         fclose(stream);*/
-         //char line[1024];
-         /*while(!feof(stream)){
-            if(fgets(line, sizeof(line), stream) == NULL) break;
-            fputs(line, stdout);
-         }
-         
-         while(fgets(line, sizeof(line), stream)){
-            printf("%s\n", line);
-            fflush(stdout);
-         }*/
+      char buf[1025] = {0};
+      //cvRead.wait(lockRead);
+      close(fd[0][WRITE_END]);
+      FILE *stream;
+      stream = fdopen (fd[0][READ_END], "r");
+      while(fgets(buf, sizeof(buf), stream)){
+         printf("%s", buf);
+         cout << "conctrl> ";
+         fflush(stream);
       }
+      fclose(stream);
 }
 
 void ConsoleThread::writeBuffer(){
@@ -163,3 +125,9 @@ void ConsoleThread::join(){
    consoleThreadWrite.join();
 }
 
+void ConsoleThread::waitDeath(){
+   int childStatus;
+   waitpid(pid, &childStatus, 0);
+   controllerProcessesAlive--;
+   
+}

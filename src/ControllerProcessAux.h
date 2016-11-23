@@ -11,14 +11,15 @@ class ControllerProcessAux{
         thread suicide;
         bool INFINITE = false, executionStatus = true;
         mutex mutExecution;
+        mutex mut;
         condition_variable executionVar;
         string filePath, fileName, idMem, idSem;
         int lives;
         pid_t pid;
-        int f[2];
         int fd[3][2];
         const int READ_END = 0;
         const int WRITE_END = 1;
+        const size_t MAX = 2048;
     public:
         ControllerProcessAux(string filePath, string fileName, string lives, string idMem, string idSem);
         void readBuffer();
@@ -32,4 +33,5 @@ class ControllerProcessAux{
         void undefine();
         void define(int num);
         void end();
+        void writeSharedMemory();
 };

@@ -7,6 +7,11 @@
 #include "suicideProcessStruct.h"
 #include <condition_variable>
 #include <mutex>
+#include <stdio.h>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -17,8 +22,8 @@ class ControlConsole{
       string idMem;
       mutex mut;
       map<string,ConsoleThread*> consoleThreadsMap;
+      thread controlConsoleThreadCheckControllerProcesses;
       
-
    public:
       condition_variable condVar;
       bool notify = false;
@@ -39,4 +44,6 @@ class ControlConsole{
       void listar(string id, string inputstring);
       void waitNotify();
       void callThread(string command, string id, string number);
+      void checkControllerProcesses();
+//      static int controllerProcessesAlive;
 };
