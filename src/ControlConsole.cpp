@@ -4,12 +4,10 @@ using namespace std;
 
 int controllerProcessesAlive;
 
-ControlConsole::ControlConsole(string routeConfigFile, string idSem, int idMem){
+ControlConsole::ControlConsole(string routeConfigFile, int idSem, int idMem){
    this->routeConfigFile = routeConfigFile;
    this->idSem = idSem;
    this->idMem = idMem;
-   createSharedMemory();
-   readSharedMemory();
 }
 
 void ControlConsole::createInterpreter(){
@@ -270,6 +268,7 @@ void ControlConsole::createThreads(){
   /* for(auto it=consoleThreadsMap.begin(); it!=consoleThreadsMap.end(); ++it){
       it->second->join();
    }*/
+   createSharedMemory();
 }
 
 void ControlConsole::checkControllerProcesses(){
@@ -279,7 +278,7 @@ void ControlConsole::checkControllerProcesses(){
 }
 
 void ControlConsole::createSharedMemory(){
-   int key = ftok("/home/ubuntu/workspace/johandiego-so/examples/shm", idMem);
+   int key = ftok("../examples/shm", idMem);
    if (key == -1) {
       cerr << "Error with key \n" << endl;
       exit(1);
@@ -299,42 +298,26 @@ void ControlConsole::createSharedMemory(){
       exit(1); 
    }
    
+   sharedMemory->valSeq = 0;
    sharedMemory->muertes = (InfoMuerte* )(sharedMemory + 1);
-   sharedMemory->muertes[0].nDecesos = 3;
+   
+   int i=0;
+   for(auto& process : consoleThreadsMap){
+      char id[256];
+      string idAux = process.first;
+      strncpy(id, idAux.c_str(), sizeof(id));
+      strncpy(sharedMemory->muertes[i].id, id, sizeof(sharedMemory->muertes[i].id));
+      i++;
+   }
+   
+  /*sharedMemory->muertes[0].nDecesos = 3;
    strcpy(sharedMemory->muertes[0].id, "hola");
    sharedMemory->muertes[1].nDecesos = 90;
    strcpy(sharedMemory->muertes[1].id, "chao");
-   sharedMemory->valSeq = 7;
+   */
    
    /* Free the shared memory */
 }
 
-void ControlConsole::readSharedMemory(){
-   int key = ftok("/home/ubuntu/workspace/johandiego-so/examples/shm", idMem);
-   if (key == -1) {
-      cerr << "Error with key \n" << endl;
-      exit(1); 
-   }
-   
-   int id_MemZone = shmget(key, 1024, 0666);
-   if (id_MemZone == -1) {
-      fprintf (stderr, "Error with id_MemZone \n");
-      exit(1); 
-   }
-   
-   MemoriaCompartida *sharedMemory; /* shared sharedMemory */
-   /* we declared to zone to share */
-   sharedMemory = (MemoriaCompartida *)shmat (id_MemZone, (char *)0, 0);
-   if (sharedMemory == NULL) {
-      fprintf (stderr, "Error reserve shared memory \n");
-      exit(1);
-   }
-   
-   printf("%ld\n", sharedMemory->valSeq);
-   printf("%s\n", sharedMemory->muertes[0].id);
-   printf("%s\n", sharedMemory->muertes[1].id);
-   shmdt ((char *)sharedMemory);
-   shmctl (id_MemZone, IPC_RMID, (struct shmid_ds *)NULL);
-   exit(0);
-}
+
 

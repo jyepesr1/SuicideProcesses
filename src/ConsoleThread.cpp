@@ -2,7 +2,7 @@
 
 extern int controllerProcessesAlive;
 
-ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess, int idMem, string idSem){
+ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess, int idMem, int idSem){
    //this->path = suicideProcess->filePath;
    //this->id = suicideProcess->id;
    //this->lives = suicideProcess->lives;
@@ -10,6 +10,7 @@ ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess, int idMem, string i
    this->suicideProcess = suicideProcess;
    this->idMem = idMem;
    this->idSem = idSem;
+   this->procId = suicideProcess->id;
    ConsoleThread::createControllerProcess();
    
 }
@@ -94,26 +95,17 @@ void ConsoleThread::createControllerProcess(){
          dup2(fd[0][WRITE_END], WRITE_END);
          close(fd[1][WRITE_END]);
          dup2(fd[1][READ_END], READ_END);
-         /*close(fd[0][READ_END]);
-         dup2(fd[0][WRITE_END], STDOUT_FILENO);
-         close(fd[1][WRITE_END]);
-         dup2(fd[1][READ_END], STDIN_FILENO);
-         close(fd[2][READ_END]);
-         dup2(fd[2][WRITE_END], STDERR_FILENO);
-         
-         close(fdin[WRITE_END]);
-         dup2(fdin[READ_END], READ_END);
-         close(fdout[READ_END]);
-         dup2(fdout[WRITE_END], WRITE_END);*/
          execl("./procesoctrl", "procesoctrl", "--filepath", filePath.c_str(), 
          "--filename", fileName.c_str(), "--reencarnacion", lives.c_str(),
-         "--memoriacompartida", to_string(idMem).c_str(), "--semaforo", idSem.c_str(), NULL);
+         "--memoriacompartida", to_string(idMem).c_str(), "--semaforo", to_string(idSem).c_str(), NULL);
          cerr << "Error" << endl;
          break;
       case -1:
          cerr << "Error" << endl;
          break;
       default:
+         dprintf(fd[1][WRITE_END], "%s\n", procId.c_str());
+         //write(fd[1][WRITE_END], procId + "", 5);
          break;
          
    }

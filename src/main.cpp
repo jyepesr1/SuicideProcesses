@@ -15,14 +15,14 @@ void showUsage(){
    exit(1);
 }
 
-void split(string argument, string& routeConfigFile, string& idSem, int& idMem){
+void split(string argument, string& routeConfigFile, int& idSem, int& idMem){
    int pos = argument.find("=");
    string key = argument.substr(0,pos);
    string value = argument.substr(pos+1);
    if(key == "--ficheroconfiguracion"){
       routeConfigFile = value;
    }else if(key == "--semaforo"){
-      idSem = value;
+      idSem = stoi(value);
    }else if(key == "--memoriacompartida"){
       idMem = stoi(value);
    }else{
@@ -32,8 +32,7 @@ void split(string argument, string& routeConfigFile, string& idSem, int& idMem){
 
 int main(int argc, const char *argv[]){
    string routeConfigFile;
-   string idSem;
-   int idMem;
+   int idMem, idSem;
 
    if(argc > 4){
       showUsage();
@@ -47,13 +46,20 @@ int main(int argc, const char *argv[]){
       routeConfigFile = "conctrl.cfg";
    }
 
-   if(idSem == ""){
-      idSem = "conctrlsem";
+   if(to_string(idSem) == ""){
+      string line;
+      ifstream myfile ("../examples/conctrlsem");
+      if (myfile.is_open()){
+         while (getline(myfile,line)){
+            idMem = stoi(line);
+         }
+         myfile.close();
+      }else cout << "Unable to open file"; 
    }
 
    if(to_string(idMem) == ""){
       string line;
-      ifstream myfile ("conctrlmem");
+      ifstream myfile ("../examples/conctrlmem");
       if (myfile.is_open()){
          while (getline(myfile,line)){
             idMem = stoi(line);

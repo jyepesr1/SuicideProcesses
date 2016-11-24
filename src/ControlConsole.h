@@ -21,8 +21,7 @@ using namespace std;
 class ControlConsole{
    private:
       string routeConfigFile;
-      string idSem;
-      int idMem;
+      int idMem, idSem;
       mutex mut;
       map<string,ConsoleThread*> consoleThreadsMap;
       thread controlConsoleThreadCheckControllerProcesses;
@@ -30,7 +29,7 @@ class ControlConsole{
    public:
       condition_variable condVar;
       bool notify = false;
-      ControlConsole(string routeConfigFile, string idSem, int idMem);
+      ControlConsole(string routeConfigFile, int idSem, int idMem);
       ControlConsole();
       void createThreads();
       int countWords(string inputstring);

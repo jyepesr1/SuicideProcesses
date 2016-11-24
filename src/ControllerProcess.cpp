@@ -4,9 +4,8 @@
 #include <string>
 #include <map>
 #include "ControllerProcessAux.h"
+
 using namespace std;
-
-
 /*
 void getOperation(string command, string id, string number){
    int code;
@@ -39,8 +38,8 @@ int main(int argc, char *argv[]){
       {"semaforo", required_argument, NULL, 's'},
       {NULL, 0, NULL, 0}
    };
-   string filepath, filename, lives, idSem;
-   int idMem;
+   string filepath, filename, lives;
+   int idMem, idSem;
    while((arg = getopt_long(argc, argv, "pnr:ms::", long_options, NULL)) != -1){
       switch(arg){
          case 'p':
@@ -56,21 +55,23 @@ int main(int argc, char *argv[]){
             idMem = stoi(optarg);
             break;
          case 's':
-            idSem = optarg;
+            idSem = stoi(optarg);
             break;
          default:
             cout << "Bad argument " << endl;
             break;
       }
    }
-   
    ControllerProcessAux* controllerProcessAux = new ControllerProcessAux(filepath, filename, lives, idMem, idSem);
-   
+   //controllerProcessAux->initializeSharedMemory();
+   //controllerProcessAux->initializeSem();
    string command, id, number;
+   getline(cin, id);
+   controllerProcessAux->setId(id);
    while(cin){
       getline(cin, command);
       getline(cin, id);
       getline(cin, number);
-      controllerProcessAux->getOperation(command, id, number);
+      controllerProcessAux->getOperation(command, number);
    }
 }

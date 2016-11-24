@@ -1,14 +1,6 @@
 #include "ControllerProcessAux.h"
-#include <map>
-#include <iostream>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <fstream>
-#include <sys/ipc.h>
-#include <sys/shm.h>
 
-ControllerProcessAux::ControllerProcessAux(string filePath, string fileName, string lives, int idMem, string idSem){
+ControllerProcessAux::ControllerProcessAux(string filePath, string fileName, string lives, int idMem, int idSem){
     this->filePath = filePath;
     this->fileName = fileName;
     this->lives = stoi(lives);
@@ -20,6 +12,10 @@ ControllerProcessAux::ControllerProcessAux(string filePath, string fileName, str
     suicide = thread(&ControllerProcessAux::createSuicideProcess, this);
     //suicide.join();
     //createSuicideProcess();
+}
+
+void ControllerProcessAux::setId(string id){
+    this->id = id;
 }
 
 void ControllerProcessAux::readBuffer(){
@@ -57,7 +53,7 @@ void ControllerProcessAux::createSuicideProcess(){
                     
                     cout << "Suicide process " << fileName << " ended because of " << childStatus << 
                     " -- Controller process " << getpid() << ", remaining lives: "<< lives << endl;
-                    
+                
                 }else{
                     outputFile << "Suicide process " << fileName << " ended because of " << childStatus << 
                     " -- Controller process " << getpid() << ", remaining lives: Infinite " << endl;
@@ -66,6 +62,8 @@ void ControllerProcessAux::createSuicideProcess(){
                     " -- Controller process " << getpid() << ", remaining lives: Infinite " << endl;
                     
                 }
+                //writeSharedMemory();
+                
                 outputFile.close();
                 if(lives == 0 && !INFINITE){
                     end();
@@ -83,7 +81,7 @@ void ControllerProcessAux::createSuicideProcess(){
     }
 }
 
-void ControllerProcessAux::getOperation(string command, string id, string number){
+void ControllerProcessAux::getOperation(string command, string number){
     int code;
     map<string, int> commands;
     commands["listar"] = 0;
@@ -209,23 +207,117 @@ void ControllerProcessAux::end(){
     }
 }
 
+void ControllerProcessAux::initializeSharedMemory(){
+   int key = ftok("../examples/shm", idMem);
+   if (key == -1) {
+      cerr << "Error with key \n" << endl;
+      exit(1); 
+   }
+   
+   this->id_MemZone = shmget(key, 1024, 0666);
+   if (id_MemZone == -1) {
+      fprintf (stderr, "Error with id_MemZone \n");
+      exit(1); 
+   }
+   
+   /* shared sharedMemory */
+   /* we declared to zone to share */
+   this->sharedMemory = (MemoriaCompartida *)shmat (id_MemZone, (char *)0, 0);
+   if (sharedMemory == NULL) {
+      fprintf (stderr, "Error reserve shared memory \n");
+      exit(1);
+   }
+   
+   sharedMemory->muertes = (InfoMuerte* )(sharedMemory + 1);
+   
+   /*
+   printf("%ld\n", sharedMemory->valSeq);
+   printf("%s\n", sharedMemory->muertes[0].id);
+   printf("%s\n", sharedMemory->muertes[1].id);
+   
+   // Free Memory
+   shmdt ((char *)sharedMemory);
+   shmctl (id_MemZone, IPC_RMID, (struct shmid_ds *)NULL);*/
+}
+
 void ControllerProcessAux::writeSharedMemory(){
-    
-    
-    
-    /*key_t key = stoi(idMem);
-    int shmid;
-    int *shm;
-    if ((shmid = shmget(key, MAX, IPC_CREAT | 0666)) < 0) {
-        cerr<<"shmget";
+    cout << sharedMemory->muertes[0].id << endl;
+    cout << "I have entered in writeSharedMemory" << endl;
+    cout << "id " <<  this->id << endl;
+    sem_lock();
+    sharedMemory->valSeq++;
+    bool searching = true;
+    int i = 0;
+    while(searching){
+        cout << "I'm searching" << endl;
+        if(strcmp(sharedMemory->muertes[i].id, this->id.c_str()) == 0){
+            cout << "I have died" << endl;
+            sharedMemory->muertes[i].nDecesos++;
+            searching = false;
+        }
+        i++;
+    }/*
+    cout << "SI" << endl;
+    for(int i =0; i< 4; i++){
+        cout << sharedMemory->muertes[i].id << endl;
+        cout << sharedMemory->muertes[i].nDecesos << endl;
+        cout << endl;
+    }  */
+    sem_unlock();
+
+   /*
+    if((shmdt ((char *)sharedMemory) == -1){
+        cerr << "Error Detaching shared Memory segment" << endl;
         exit(1);
     }
-    if ((shm = (int *)shmat(shmid, 0, 0)) == (int *) -1) {
-        cerr<<"shmat";
+    
+    if((shmctl (id_MemZone, IPC_RMID, (struct shmid_ds *)NULL)) == -1){
+        cerr << "Error De-allocating shared Memory segment" << endl;
         exit(1);
-    }
-    for(int i = 0; i < 10; i++){
-        cout << i << endl;
-        *shm = i;
     }*/
+}
+
+void ControllerProcessAux::sem_lock(){
+    /* structure for semaphore operations.   */
+    struct sembuf sem_op;
+
+    /* wait on the semaphore, unless it's value is non-negative. */
+    sem_op.sem_num = 0;
+    sem_op.sem_op = -1;
+    sem_op.sem_flg = 0;
+    semop(sem_id, &sem_op, 1);
+}
+
+void ControllerProcessAux::sem_unlock(){
+    /* structure for semaphore operations.   */
+    struct sembuf sem_op;
+
+    /* signal the semaphore - increase its value by one. */
+    sem_op.sem_num = 0;
+    sem_op.sem_op = 1;
+    sem_op.sem_flg = 0;
+    semop(sem_id, &sem_op, 1);
+}
+
+void ControllerProcessAux::initializeSem(){
+    union semun {              /* semaphore value, for semctl().     */
+        int val;
+        struct semid_ds *buf;
+        ushort * array;
+    } sem_val;    
+    
+    /* create a semaphore set, with one semaphore   */
+    sem_id = semget(idSem, 1, IPC_CREAT | 0666);
+    if(sem_id == -1){
+        cerr << "Error creating semaphore" << endl;
+        exit(1);
+    }
+    
+    /* intialize the first (and single) semaphore in our set to '1'. */
+    sem_val.val = 1;
+    int returnValue = semctl(sem_id, 0, SETVAL, sem_val);
+    if (returnValue == -1) {
+        cerr << "Error initializing semaphore" << endl;
+	    exit(1);
+    }
 }

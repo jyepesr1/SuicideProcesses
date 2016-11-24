@@ -1,8 +1,21 @@
 #pragma once
+
 #include <string>
+#include <string.h>
 #include <thread>
 #include <condition_variable>
 #include <mutex>
+#include <map>
+#include <iostream>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <fstream>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/sem.h>
+#include "MemoriaCompartida.h"
+
 
 using namespace std;
 
@@ -13,17 +26,21 @@ class ControllerProcessAux{
         mutex mutExecution;
         mutex mut;
         condition_variable executionVar;
-        string filePath, fileName, idMem, idSem;
-        int lives;
+        string filePath, fileName;
+        int idMem, idSem, id_MemZone, lives, sem_id;
         pid_t pid;
         int fd[3][2];
+        MemoriaCompartida *sharedMemory;
         const int READ_END = 0;
         const int WRITE_END = 1;
         const size_t MAX = 2048;
+        string id;
+        void sem_lock();
+        void sem_unlock();
     public:
-        ControllerProcessAux(string filePath, string fileName, string lives, int idMem, string idSem);
+        ControllerProcessAux(string filePath, string fileName, string lives, int idMem, int idSem);
         void readBuffer();
-        void getOperation(string command, string id, string number);
+        void getOperation(string command, string number);
         void createSuicideProcess();
         void list();
         void sum(int num);
@@ -33,5 +50,8 @@ class ControllerProcessAux{
         void undefine();
         void define(int num);
         void end();
+        void initializeSharedMemory();
         void writeSharedMemory();
+        void initializeSem();
+        void setId(string id);
 };
