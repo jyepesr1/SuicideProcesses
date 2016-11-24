@@ -63,8 +63,8 @@ int main(int argc, char *argv[]){
       }
    }
    ControllerProcessAux* controllerProcessAux = new ControllerProcessAux(filepath, filename, lives, idMem, idSem);
-   //controllerProcessAux->initializeSharedMemory();
-   //controllerProcessAux->initializeSem();
+   controllerProcessAux->initializeSharedMemory();
+   controllerProcessAux->initializeSem();
    string command, id, number;
    getline(cin, id);
    controllerProcessAux->setId(id);

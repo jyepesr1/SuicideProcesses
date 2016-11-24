@@ -15,16 +15,18 @@
 #include <stdlib.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/sem.h>
 
 using namespace std;
 
 class ControlConsole{
    private:
       string routeConfigFile;
-      int idMem, idSem;
+      int idMem, idSem, id_MemZone;
       mutex mut;
       map<string,ConsoleThread*> consoleThreadsMap;
       thread controlConsoleThreadCheckControllerProcesses;
+      MemoriaCompartida *sharedMemory;
       
    public:
       condition_variable condVar;

@@ -62,20 +62,15 @@ void ControllerProcessAux::createSuicideProcess(){
                     " -- Controller process " << getpid() << ", remaining lives: Infinite " << endl;
                     
                 }
-                //writeSharedMemory();
+                sem_lock();
+                writeSharedMemory();
+                sem_unlock();
                 
                 outputFile.close();
                 if(lives == 0 && !INFINITE){
                     end();
                 }
                 break;
-                /*while(lives > 0){
-                    int childStatus;
-                    waitpid(pid, &childStatus, 0);
-                    lives--;
-                    cout << "Suicide process " << fileName << " ended because of " << childStatus << 
-                    " -- Controller process " << getpid() << ", remaining lives "<< lives << endl;
-                }*/
                 
         }
     }
@@ -200,7 +195,6 @@ void ControllerProcessAux::define(int num){
 void ControllerProcessAux::end(){
     cout << "Controller process " << getpid() << " ended " << endl;
     try{
-        //kill(getpid(), SIGKILL);
         exit(1);
     }catch(int &z){
         cout << "Troubles" << endl;
@@ -214,9 +208,11 @@ void ControllerProcessAux::initializeSharedMemory(){
       exit(1); 
    }
    
-   this->id_MemZone = shmget(key, 1024, 0666);
+   int memSize = sizeof(long int) + sizeof(InfoMuerte*) + (256 + sizeof(int))*4;
+   
+   this->id_MemZone = shmget(key, memSize, 0666);
    if (id_MemZone == -1) {
-      fprintf (stderr, "Error with id_MemZone \n");
+      fprintf (stderr, "Error with id_MemZone Reading\n");
       exit(1); 
    }
    
@@ -227,54 +223,21 @@ void ControllerProcessAux::initializeSharedMemory(){
       fprintf (stderr, "Error reserve shared memory \n");
       exit(1);
    }
-   
-   sharedMemory->muertes = (InfoMuerte* )(sharedMemory + 1);
-   
-   /*
-   printf("%ld\n", sharedMemory->valSeq);
-   printf("%s\n", sharedMemory->muertes[0].id);
-   printf("%s\n", sharedMemory->muertes[1].id);
-   
-   // Free Memory
-   shmdt ((char *)sharedMemory);
-   shmctl (id_MemZone, IPC_RMID, (struct shmid_ds *)NULL);*/
 }
 
 void ControllerProcessAux::writeSharedMemory(){
-    cout << sharedMemory->muertes[0].id << endl;
-    cout << "I have entered in writeSharedMemory" << endl;
-    cout << "id " <<  this->id << endl;
-    sem_lock();
+   
+    sharedMemory->muertes = (InfoMuerte* )(sharedMemory + 1);
     sharedMemory->valSeq++;
     bool searching = true;
     int i = 0;
     while(searching){
-        cout << "I'm searching" << endl;
         if(strcmp(sharedMemory->muertes[i].id, this->id.c_str()) == 0){
-            cout << "I have died" << endl;
             sharedMemory->muertes[i].nDecesos++;
             searching = false;
         }
         i++;
-    }/*
-    cout << "SI" << endl;
-    for(int i =0; i< 4; i++){
-        cout << sharedMemory->muertes[i].id << endl;
-        cout << sharedMemory->muertes[i].nDecesos << endl;
-        cout << endl;
-    }  */
-    sem_unlock();
-
-   /*
-    if((shmdt ((char *)sharedMemory) == -1){
-        cerr << "Error Detaching shared Memory segment" << endl;
-        exit(1);
     }
-    
-    if((shmctl (id_MemZone, IPC_RMID, (struct shmid_ds *)NULL)) == -1){
-        cerr << "Error De-allocating shared Memory segment" << endl;
-        exit(1);
-    }*/
 }
 
 void ControllerProcessAux::sem_lock(){

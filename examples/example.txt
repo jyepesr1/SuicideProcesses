@@ -1,4 +1,4 @@
-ProcesoSui primerSuicida { /home/ubuntu/workspace/ProcesoSuicidaLinux/src :: primero 1 }
-ProcesoSui segundoSuicida { /home/ubuntu/workspace/ProcesoSuicidaLinux/src :: segundo 3 }
-ProcesoSui tercerSuicida { /home/ubuntu/workspace/ProcesoSuicidaLinux/src :: tercero 1 }
-ProcesoSui tercerSuicida2 { /home/ubuntu/workspace/ProcesoSuicidaLinux/src :: tercero 2 }
+ProcesoSui uno { /home/ubuntu/workspace/ProcesoSuicidaLinux/src :: primero 4 }
+ProcesoSui dos { /home/ubuntu/workspace/ProcesoSuicidaLinux/src :: segundo 3 }
+ProcesoSui tres { /home/ubuntu/workspace/ProcesoSuicidaLinux/src :: tercero 3 }
+ProcesoSui cuatro { /home/ubuntu/workspace/ProcesoSuicidaLinux/src :: tercero 2 }
