@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 int
 main(int argc, 
      char *argv[], 
@@ -16,6 +17,7 @@ main(int argc,
   /* Genera un numero aleatorio para determinar cual
      sera la causa del suicidio */
   srandom(time(NULL));
+  fprintf(stdout, "%s\n", "SUICIDA 1 - PUTOS");
   switch (random() % 7) {
   case 0: /* Suicidio voluntario */
     exit(random() % 10);

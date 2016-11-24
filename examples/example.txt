@@ -1,4 +1,4 @@
-ProcesoSui uno { ./../examples/ProcesoSuicidaLinux/src :: primero 4 }
-ProcesoSui dos { ./../examples/ProcesoSuicidaLinux/src :: segundo 3 }
+ProcesoSui uno { ./../examples/ProcesoSuicidaLinux/src :: primero 7 }
+ProcesoSui dos { ./../examples/ProcesoSuicidaLinux/src :: segundo 2 }
 ProcesoSui tres { ./../examples/ProcesoSuicidaLinux/src :: tercero 3 }
-ProcesoSui cuatro { ./../examples/ProcesoSuicidaLinux/src :: tercero 2 }
+ProcesoSui cuatro { ./../examples/ProcesoSuicidaLinux/src :: tercero 4 }

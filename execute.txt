@@ -1,2 +1,2 @@
 ./conctrl --ficheroconfiguracion=./../examples/example.txt
-./conctrl --ficheroconfiguracion=./../examples/example.txt --semaforo=asd --memoriacompartida=2
+./conctrl --ficheroconfiguracion=./../examples/example.txt --semaforo=7 --memoriacompartida=2

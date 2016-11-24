@@ -32,7 +32,7 @@ class ControlConsole{
       condition_variable condVar;
       bool notify = false;
       ControlConsole(string routeConfigFile, int idSem, int idMem);
-      ControlConsole();
+      ~ControlConsole();
       void createThreads();
       int countWords(string inputstring);
       void createInterpreter();

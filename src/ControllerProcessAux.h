@@ -21,24 +21,27 @@ using namespace std;
 
 class ControllerProcessAux{
     private:
-        thread suicide;
+        thread suicide, readthread;
+        int mapSize = 0;
         bool INFINITE = false, executionStatus = true;
         mutex mutExecution;
         mutex mut;
         condition_variable executionVar;
         string filePath, fileName;
-        int idMem, idSem, id_MemZone, lives, sem_id;
+        int idMem, idSem, id_MemZone, lives, sem_id, controllerNum;
         pid_t pid;
-        int fd[3][2];
+        int fd[3][3];
         MemoriaCompartida *sharedMemory;
         const int READ_END = 0;
         const int WRITE_END = 1;
+        const int ERR_END = 2;
         const size_t MAX = 2048;
         string id;
         void sem_lock();
         void sem_unlock();
     public:
         ControllerProcessAux(string filePath, string fileName, string lives, int idMem, int idSem);
+        ~ControllerProcessAux();
         void readBuffer();
         void getOperation(string command, string number);
         void createSuicideProcess();
@@ -54,4 +57,6 @@ class ControllerProcessAux{
         void writeSharedMemory();
         void initializeSem();
         void setId(string id);
+        void setMapSize(int mapSize);
+        void setControllerNum(int controllerNum);
 };

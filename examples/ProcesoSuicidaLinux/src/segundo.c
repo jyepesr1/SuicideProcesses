@@ -17,7 +17,7 @@ main(int argc,
   /* Genera un numero aleatorio para determinar cual
      sera la causa del suicidio */
   srandom(time(NULL));
-  
+  fprintf(stdout, "%s\n", "SUICIDA 2 - PUTOS");
   switch (random() % 7) {
   case 0: /* Suicidio voluntario */
     exit(random() % 10);

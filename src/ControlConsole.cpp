@@ -16,7 +16,7 @@ void ControlConsole::createInterpreter(){
       cout << "conctrl> ";
       getline(cin, line);
       if(line.length() == 0){
-         exit(EXIT_SUCCESS);
+         continue;
       }
       checkGrammar(line);
    }
@@ -244,12 +244,18 @@ SuicideProcess* ControlConsole::getProcessInfo(string line){
 void ControlConsole::readFile(string file){
 	string line;
    ifstream myfile(file, ifstream::in);
+   int i = 0;
    if (myfile.is_open()){
       while (getline(myfile,line)){
          SuicideProcess* suicideProcess = getProcessInfo(line);
-         consoleThreadsMap[suicideProcess->id] = new ConsoleThread(suicideProcess, idMem, idSem);
+         consoleThreadsMap[suicideProcess->id] = new ConsoleThread(suicideProcess, idMem, idSem, i);
+         i++;
       }
       myfile.close();
+      int mapSize = consoleThreadsMap.size();
+      for(auto& thread : consoleThreadsMap){
+         thread.second->setMapSize(mapSize);
+      }
 
       controlConsoleThreadCheckControllerProcesses = thread(&ControlConsole::checkControllerProcesses, this);
       createThreads();
@@ -276,10 +282,10 @@ void ControlConsole::checkControllerProcesses(){
    while(controllerProcessesAlive != 0);
    this->sharedMemory->muertes = (InfoMuerte* )(sharedMemory + 1);
    cout << "-------------------------" << endl;
-   cout << sharedMemory->valSeq << endl;
+   cout << "sharedMemory->valSeq: " << sharedMemory->valSeq << endl;
    for(int i =0; i< 4; i++){
-      cout << sharedMemory->muertes[i].id << endl;
-      cout << sharedMemory->muertes[i].nDecesos << endl;
+      cout << "sharedMemory->muertes[" << i << "].id: " << sharedMemory->muertes[i].id << endl;
+      cout << "sharedMemory->muertes[" << i << "].nDecesos: " << sharedMemory->muertes[i].nDecesos << endl;
    }
    
    //Delete Shared Memory
@@ -315,10 +321,8 @@ void ControlConsole::checkControllerProcesses(){
         cerr << "Error initializing semaphore" << endl;
 	    exit(1);
     }
-   
-   
-   
-   exit(0);
+    
+    exit(0);
 }
 
 void ControlConsole::createSharedMemory(){
@@ -354,14 +358,14 @@ void ControlConsole::createSharedMemory(){
       strncpy(sharedMemory->muertes[i].id, id, sizeof(sharedMemory->muertes[i].id));
       i++;
    }
-   
-  /*sharedMemory->muertes[0].nDecesos = 3;
-   strcpy(sharedMemory->muertes[0].id, "hola");
-   sharedMemory->muertes[1].nDecesos = 90;
-   strcpy(sharedMemory->muertes[1].id, "chao");
-   */
-   
-   /* Free the shared memory */
+}
+
+ControlConsole::~ControlConsole(){
+   for (auto it=consoleThreadsMap.begin(); it!=consoleThreadsMap.end(); ++it){
+      delete it->second;
+      consoleThreadsMap.erase(it);
+   }
+   delete sharedMemory;
 }
 
 

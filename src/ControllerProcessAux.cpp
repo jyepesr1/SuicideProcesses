@@ -10,23 +10,42 @@ ControllerProcessAux::ControllerProcessAux(string filePath, string fileName, str
         INFINITE = true;
     }
     suicide = thread(&ControllerProcessAux::createSuicideProcess, this);
-    //suicide.join();
-    //createSuicideProcess();
+    readthread = thread(&ControllerProcessAux::readBuffer, this);
 }
 
 void ControllerProcessAux::setId(string id){
     this->id = id;
 }
 
+void ControllerProcessAux::setMapSize(int mapSize){
+    this->mapSize = mapSize;
+}
+
+void ControllerProcessAux::setControllerNum(int controllerNum){
+    this->controllerNum = controllerNum;
+}
+
 void ControllerProcessAux::readBuffer(){
-    char readbuffer[1024];
+    /*char readbuffer[1024];
     close(fd[0][WRITE_END]);
-    read(fd[0][READ_END], readbuffer, sizeof(readbuffer));
+    read(fd[0][READ_END], readbuffer, sizeof(readbuffer));*/
+    char buf[1025] = {0};
+    close(fd[0][WRITE_END]);
+    FILE *stream;
+    stream = fdopen (fd[0][READ_END], "r");
+    while(fgets(buf, sizeof(buf), stream)){
+        //printf("%s", buf);
+        cout << buf << endl;
+        fflush(stream);
+    }
+    fclose(stream);
 }
 
 void ControllerProcessAux::createSuicideProcess(){
     unique_lock<mutex> lock(mutExecution);
-    //pipe(fd[0]);
+    pipe(fd[0]);
+    pipe(fd[1]);
+    pipe(fd[2]);
     while(lives > 0 || INFINITE){
         while(!executionStatus){
             executionVar.wait(lock);
@@ -35,12 +54,17 @@ void ControllerProcessAux::createSuicideProcess(){
         string executable = filePath + "/" + fileName;
         switch(pid){
             case 0:
-      /*          close(fd[0][READ_END]);
+                close(fd[0][READ_END]);
                 dup2(fd[0][WRITE_END], WRITE_END);
+         
+                close(fd[2][READ_END]);
+                dup2(fd[2][ERR_END], ERR_END);
+         
                 close(fd[1][WRITE_END]);
-                dup2(fd[1][READ_END], READ_END);*/
+                dup2(fd[1][READ_END], READ_END);
+                
                 execl(executable.c_str(), fileName.c_str(), NULL);
-                cout << "Error" << endl;
+                cerr << "Error creating suicicide process" << endl;
                 break;
             default:
                 int childStatus;
@@ -49,17 +73,17 @@ void ControllerProcessAux::createSuicideProcess(){
                 if(!INFINITE){
                     lives--;
                     outputFile << "Suicide process " << fileName << " ended because of " << childStatus << 
-                    " -- Controller process " << getpid() << ", remaining lives: "<< lives << endl;
+                    " -- Controller process " << controllerNum << ", remaining lives: "<< lives << endl;
                     
                     cout << "Suicide process " << fileName << " ended because of " << childStatus << 
-                    " -- Controller process " << getpid() << ", remaining lives: "<< lives << endl;
+                    " -- Controller process " << controllerNum << ", remaining lives: "<< lives << endl;
                 
                 }else{
                     outputFile << "Suicide process " << fileName << " ended because of " << childStatus << 
-                    " -- Controller process " << getpid() << ", remaining lives: Infinite " << endl;
+                    " -- Controller process " << controllerNum<< ", remaining lives: Infinite " << endl;
                     
                     cout << "Suicide process " << fileName << " ended because of " << childStatus << 
-                    " -- Controller process " << getpid() << ", remaining lives: Infinite " << endl;
+                    " -- Controller process " << controllerNum << ", remaining lives: Infinite " << endl;
                     
                 }
                 sem_lock();
@@ -124,7 +148,7 @@ void ControllerProcessAux::getOperation(string command, string number){
 
 
 void ControllerProcessAux::list(){
-    cout << "Controller process " << getpid() << ": "
+    cout << "Controller process " << controllerNum << ": "
          << "Suicide process " << fileName << ", "
          << "File path: " << filePath << ", "
          << "Id memory: " << idMem << ", "
@@ -139,29 +163,31 @@ void ControllerProcessAux::list(){
 void ControllerProcessAux::sum(int num){
     if(INFINITE){
         cout << "Suicide process " << fileName << " couldn't add more lives "
-        " -- Controller process " << getpid() << ", remaining lives: Infinite" << endl;
+        " -- Controller process " << controllerNum << ", remaining lives: Infinite" << endl;
     }else{
         this->lives = this->lives + num;
         cout << "Suicide process " << fileName << " has added " << num << 
-        " lives -- Controller process " << getpid() << ", remaining lives: "<< lives << endl;
+        " lives -- Controller process " << controllerNum << ", remaining lives: "<< lives << endl;
     }
 }
 
 void ControllerProcessAux::sub(int num){
     if(INFINITE){
         cout << "Suicide process " << fileName << " couldn't lose lives "
-        " -- Controller process " << getpid() << ", remaining lives: Infinite" << endl;
+        " -- Controller process " << controllerNum << ", remaining lives: Infinite" << endl;
+    }else if((this->lives - num) <= 0){
+        cerr << "Operation substract is invalid" << endl;
     }else{
         this->lives = this->lives - num;
         cout << "Suicide process " << fileName << " has lost " << num << 
-        " lives -- Controller process " << getpid() << ", remaining lives "<< lives << endl;
+        " lives -- Controller process " << controllerNum << ", remaining lives "<< lives << endl;
     }
 }
 
 void ControllerProcessAux::suspend(){
     executionStatus = false;
     cout << "Suicide process " << fileName << " has been suspended " <<
-    " -- Controller process " << getpid() << ", remaining lives: "<< lives << endl;
+    " -- Controller process " << controllerNum << ", remaining lives: "<< lives << endl;
 }
 
 void ControllerProcessAux::restore(){
@@ -169,18 +195,18 @@ void ControllerProcessAux::restore(){
     executionStatus = true;
     executionVar.notify_one();
     cout << "Suicide process " << fileName << " has been restored " <<
-    " -- Controller process " << getpid() << ", remaining lives: "<< lives << endl;
+    " -- Controller process " << controllerNum << ", remaining lives: "<< lives << endl;
 }
 
 void ControllerProcessAux::undefine(){
     if(INFINITE){
         cout << "Suicide process " << fileName << " already had infinite lives " <<
-        " -- Controller process " << getpid() << ", remaining lives: Infinite" << endl;
+        " -- Controller process " << controllerNum << ", remaining lives: Infinite" << endl;
     }else{
         this->lives = 0;
         INFINITE = true;
         cout << "Suicide process " << fileName << " has been undefined " <<
-        " -- Controller process " << getpid() << ", remaining lives: Infinite" << endl;
+        " -- Controller process " << controllerNum << ", remaining lives: Infinite" << endl;
     }
 }
 
@@ -190,14 +216,14 @@ void ControllerProcessAux::define(int num){
     }
     this->lives = num;
     cout << "Suicide process " << fileName << " has been defined " <<
-    " -- Controller process " << getpid() << ", remaining lives "<< lives << endl;
+    " -- Controller process " << controllerNum << ", remaining lives "<< lives << endl;
 }
 void ControllerProcessAux::end(){
-    cout << "Controller process " << getpid() << " ended " << endl;
+    cout << "Controller process " << controllerNum << " ended " << endl;
     try{
         exit(1);
     }catch(int &z){
-        cout << "Troubles" << endl;
+        cerr << "Error finishing process " << fileName << endl;
     }
 }
 
@@ -208,11 +234,11 @@ void ControllerProcessAux::initializeSharedMemory(){
       exit(1); 
    }
    
-   int memSize = sizeof(long int) + sizeof(InfoMuerte*) + (256 + sizeof(int))*4;
+   int memSize = sizeof(long int) + sizeof(InfoMuerte*) + (256 + sizeof(int))*this->mapSize;
    
-   this->id_MemZone = shmget(key, memSize, 0666);
+   this->id_MemZone = shmget(key, memSize, 0666 | IPC_CREAT);
    if (id_MemZone == -1) {
-      fprintf (stderr, "Error with id_MemZone Reading\n");
+       cerr << "Error with id_MemZone Reading" << endl;
       exit(1); 
    }
    
@@ -220,7 +246,7 @@ void ControllerProcessAux::initializeSharedMemory(){
    /* we declared to zone to share */
    this->sharedMemory = (MemoriaCompartida *)shmat (id_MemZone, (char *)0, 0);
    if (sharedMemory == NULL) {
-      fprintf (stderr, "Error reserve shared memory \n");
+       cerr << "Error reserve shared memory" << endl;
       exit(1);
    }
 }
@@ -283,4 +309,8 @@ void ControllerProcessAux::initializeSem(){
         cerr << "Error initializing semaphore" << endl;
 	    exit(1);
     }
+}
+
+ControllerProcessAux::~ControllerProcessAux(){
+    delete sharedMemory;
 }

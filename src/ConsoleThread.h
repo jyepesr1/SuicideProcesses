@@ -20,14 +20,14 @@ class ConsoleThread{
    private:
       const int READ_END = 0;
       const int WRITE_END = 1;
+      const int ERR_END = 2;
       condition_variable cvRead, cvWrite;
       mutex mutRead, mutWrite;
       string command, id, number, procId;
-      int idMem, idSem;
+      int idMem, idSem, mapSize, controllerNum;
       SuicideProcess* suicideProcess;
       pid_t pid;
-      int fdin[2], fdout[2];
-      int fd[3][2];
+      int fd[3][3];
       thread consoleThreadRead;
       thread consoleThreadWrite;
       thread consoleThreadWaitControllerProcessDeath;
@@ -38,9 +38,10 @@ class ConsoleThread{
       void joinThreads();
       
    public:
-      ConsoleThread(SuicideProcess* suicideProcesses, int idMem, int idSem);
+      ConsoleThread(SuicideProcess* suicideProcesses, int idMem, int idSem, int controllerNum);
       ~ConsoleThread();
       void createThread();
       void callNotifyWrite(string command, string id, string number);
       void callNotifyRead(string command);
+      void setMapSize(int mapSize);
 };

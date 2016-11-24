@@ -15,6 +15,10 @@ void showUsage(){
    exit(1);
 }
 
+bool isaNumber(string str){
+   return str.find_first_not_of("0123456789") == string::npos;
+}
+
 void split(string argument, string& routeConfigFile, int& idSem, int& idMem){
    int pos = argument.find("=");
    string key = argument.substr(0,pos);
@@ -22,8 +26,16 @@ void split(string argument, string& routeConfigFile, int& idSem, int& idMem){
    if(key == "--ficheroconfiguracion"){
       routeConfigFile = value;
    }else if(key == "--semaforo"){
+      if(!isaNumber(value)){
+         cerr << "Error: Wrong semaphore id, it must be a numerical id." << endl;
+         exit(1);
+      }
       idSem = stoi(value);
    }else if(key == "--memoriacompartida"){
+      if(!isaNumber(value)){
+         cerr << "Error: Wrong shared memory id,  it must be a numerical id." << endl;
+         exit(1);
+      }
       idMem = stoi(value);
    }else{
       showUsage();
@@ -68,10 +80,13 @@ int main(int argc, const char *argv[]){
       }else cout << "Unable to open file"; 
    }
    
-   ControlConsole controlConsole(routeConfigFile, idSem, idMem);
-   controlConsole.readFile(routeConfigFile);
-   controlConsole.createInterpreter();
-
-   cout << "R:" << routeConfigFile << " S: " << idSem << " M: " << idMem << endl;
+   
+   ControlConsole* controlConsole = new ControlConsole(routeConfigFile, idSem, idMem);
+   controlConsole->readFile(routeConfigFile);
+   controlConsole->createInterpreter();
+   
+   delete controlConsole;
+   
+   return 0;
 }
 

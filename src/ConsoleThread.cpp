@@ -2,7 +2,7 @@
 
 extern int controllerProcessesAlive;
 
-ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess, int idMem, int idSem){
+ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess, int idMem, int idSem, int controllerNum){
    //this->path = suicideProcess->filePath;
    //this->id = suicideProcess->id;
    //this->lives = suicideProcess->lives;
@@ -11,8 +11,14 @@ ConsoleThread::ConsoleThread(SuicideProcess* suicideProcess, int idMem, int idSe
    this->idMem = idMem;
    this->idSem = idSem;
    this->procId = suicideProcess->id;
+   this->controllerNum = controllerNum;
    ConsoleThread::createControllerProcess();
    
+}
+
+void ConsoleThread::setMapSize(int mapSize){
+   this->mapSize = mapSize;
+   dprintf(fd[1][WRITE_END], "%i\n", mapSize);
 }
 
 void ConsoleThread::createThread(){
@@ -93,15 +99,21 @@ void ConsoleThread::createControllerProcess(){
       case 0:
          close(fd[0][READ_END]);
          dup2(fd[0][WRITE_END], WRITE_END);
+         
+         close(fd[2][READ_END]);
+         dup2(fd[2][ERR_END], ERR_END);
+         
          close(fd[1][WRITE_END]);
          dup2(fd[1][READ_END], READ_END);
+         
          execl("./procesoctrl", "procesoctrl", "--filepath", filePath.c_str(), 
          "--filename", fileName.c_str(), "--reencarnacion", lives.c_str(),
-         "--memoriacompartida", to_string(idMem).c_str(), "--semaforo", to_string(idSem).c_str(), NULL);
-         cerr << "Error" << endl;
+         "--memoriacompartida", to_string(idMem).c_str(), "--semaforo", to_string(idSem).c_str(),
+         to_string(controllerNum).c_str(), NULL);
+         cerr << "Error creating Process Controller" << endl;
          break;
       case -1:
-         cerr << "Error" << endl;
+         cerr << "Error creating Process Controller" << endl;
          break;
       default:
          dprintf(fd[1][WRITE_END], "%s\n", procId.c_str());
@@ -123,4 +135,8 @@ void ConsoleThread::waitDeath(){
    waitpid(pid, &childStatus, 0);
    controllerProcessesAlive--;
    joinThreads();
+}
+
+ConsoleThread::~ConsoleThread(){
+   delete suicideProcess;
 }

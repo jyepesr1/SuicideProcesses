@@ -6,27 +6,6 @@
 #include "ControllerProcessAux.h"
 
 using namespace std;
-/*
-void getOperation(string command, string id, string number){
-   int code;
-   map<string, int> commands;
-   commands["listar"] = 0;
-   commands["sumar"] = 1;
-   commands["restar"] = 2;
-   commands["suspender"] = 3;
-   commands["restablecer"] = 4;
-   commands["indefinir"] = 5;
-   commands["definir"] = 6;
-   commands["terminar"] = 7;
-   code = commands.find(command)->second;
-   switch(code){
-      case 0:
-         cout << "listar" << endl;
-         break;
-      default:
-         cout << "nothing" << endl;
-   }
-}*/
 
 int main(int argc, char *argv[]){
    int arg;
@@ -58,20 +37,31 @@ int main(int argc, char *argv[]){
             idSem = stoi(optarg);
             break;
          default:
-            cout << "Bad argument " << endl;
+            cerr << "Error: Bad arguments. " << endl;
             break;
       }
    }
+   if(argc > 12){
+      cerr << "Error: Bad arguments. " << endl;
+      exit(1);
+   }
+   int controllerNum = stoi(argv[11]);
    ControllerProcessAux* controllerProcessAux = new ControllerProcessAux(filepath, filename, lives, idMem, idSem);
+   string command, id, number, temp;
+   getline(cin, id);
+   getline(cin, temp);
+   int mapSize = stoi(temp);
+   controllerProcessAux->setId(id);
+   controllerProcessAux->setControllerNum(controllerNum);
+   controllerProcessAux->setMapSize(mapSize);
    controllerProcessAux->initializeSharedMemory();
    controllerProcessAux->initializeSem();
-   string command, id, number;
-   getline(cin, id);
-   controllerProcessAux->setId(id);
    while(cin){
       getline(cin, command);
       getline(cin, id);
       getline(cin, number);
       controllerProcessAux->getOperation(command, number);
    }
+   
+   delete controllerProcessAux;
 }
