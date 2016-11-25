@@ -61,9 +61,9 @@ void ControlConsole::error(){
 bool ControlConsole::check(bool correctArgs, bool isNumber){
    if(!(correctArgs == true && isNumber == true)){
       error();
-      return false; 
+      return false;
    }
-   
+
    return true;
 }
 
@@ -149,15 +149,15 @@ void ControlConsole::callThread(string command, string id, string number){
             if(command == "terminar") exit(1);
          }
       }catch(const out_of_range& oor){
-         cerr << "Out of Range error" << endl;
+         cerr << "Suicide Process doesn't exist" << endl;
       }
    }else{
       try {
          consoleThreadsMap.at(id)->callNotifyWrite(command, id, number);
          if(command == "terminar") consoleThreadsMap.erase(id);
       }catch (const out_of_range& oor) {
-         cerr << "Out of Range error: " << endl;
-      }  
+         cerr << "Suicide Process doesn't exist" << endl;
+      }
    }
 }
 
@@ -271,7 +271,7 @@ void ControlConsole::createThreads(){
    for(auto& thread : consoleThreadsMap){
       thread.second->createThread();
    }
-   
+
    createSharedMemory();
 }
 
@@ -286,41 +286,41 @@ void ControlConsole::checkControllerProcesses(){
       cout << "sharedMemory->muertes[" << i << "].id: " << sharedMemory->muertes[i].id << endl;
       cout << "sharedMemory->muertes[" << i << "].nDecesos: " << sharedMemory->muertes[i].nDecesos << endl;
    }
-   
+
    //Delete Shared Memory
-   
+
    if(shmdt ((char *)sharedMemory) == -1){
       cerr << "Error Detaching shared Memory segment" << endl;
       exit(1);
    }
-    
+
    if((shmctl (id_MemZone, IPC_RMID, (struct shmid_ds *)NULL)) == -1){
       cerr << "Error De-allocating shared Memory segment" << endl;
       exit(1);
    }
-   
+
    //Delete Semaphore
-   
-   union semun {              
+
+   union semun {
         int val;
         struct semid_ds *buf;
         ushort * array;
-    } sem_val;    
-    
+    } sem_val;
+
     int sem_id = semget(idSem, 1, 0666);
     if(sem_id == -1){
         cerr << "Error creating semaphore" << endl;
         exit(1);
     }
-    
-    
+
+
     sem_val.val = 1;
     int returnValue = semctl(sem_id, 0, IPC_RMID, sem_val);
     if (returnValue == -1) {
         cerr << "Error initializing semaphore" << endl;
 	    exit(1);
     }
-    
+
     exit(0);
 }
 
@@ -330,25 +330,25 @@ void ControlConsole::createSharedMemory(){
       cerr << "Error with key \n" << endl;
       exit(1);
    }
-   
+
    int memSize = sizeof(long int) + sizeof(InfoMuerte*) + (256 + sizeof(int))*consoleThreadsMap.size();
 
    this->id_MemZone = shmget(key, memSize, 0666 | IPC_CREAT);
    if (id_MemZone == -1) {
       fprintf (stderr, "Error with id_MemZone Creating \n");
-      exit(1); 
+      exit(1);
    }
-   
+
    /* we declared to zone to share */
    this->sharedMemory = (MemoriaCompartida *)shmat (id_MemZone, (char *)0, 0);
    if (sharedMemory == NULL) {
       fprintf (stderr, "Error reserve shared memory \n");
-      exit(1); 
+      exit(1);
    }
-   
+
    this->sharedMemory->valSeq = 0;
    this->sharedMemory->muertes = (InfoMuerte* )(sharedMemory + 1);
-   
+
    int i=0;
    for(auto& process : consoleThreadsMap){
       char id[256];
