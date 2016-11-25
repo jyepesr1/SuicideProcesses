@@ -247,9 +247,14 @@ void ControlConsole::readFile(string file){
    int i = 0;
    if (myfile.is_open()){
       while (getline(myfile,line)){
+         if(line == "") continue;
          SuicideProcess* suicideProcess = getProcessInfo(line);
          consoleThreadsMap[suicideProcess->id] = new ConsoleThread(suicideProcess, idMem, idSem, i);
          i++;
+      }
+      if(i == 0){
+         cout << "Input file is empty" << endl;
+         exit(0);
       }
       myfile.close();
       mapSize = consoleThreadsMap.size();
@@ -267,13 +272,6 @@ void ControlConsole::createThreads(){
       thread.second->createThread();
    }
    
-   /*for(auto it=consoleThreadsMap.begin(); it!=consoleThreadsMap.end(); ++it){
-      it->second->createThread();
-   }*/
-
-  /* for(auto it=consoleThreadsMap.begin(); it!=consoleThreadsMap.end(); ++it){
-      it->second->join();
-   }*/
    createSharedMemory();
 }
 

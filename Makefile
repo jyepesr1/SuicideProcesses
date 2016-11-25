@@ -2,39 +2,44 @@ CXX=g++
 CXXFLAGS=-Wall -pthread --std=c++11
 SRC_PATH=./src
 OUT_PATH=./bin
-FILES=main.cpp ControlConsole.cpp ConsoleThread.cpp
-OBJECTS=$(FILES:%.cpp=$(SRC_PATH)/%.o)
-FILES1=procesoctrl.cpp ControllerProcessAux.cpp
-OBJECTS1=$(FILES1:%.cpp=$(SRC_PATH)/%.o)
 
-all: conctrl procesoctrl
+all: $(SRC_PATH)/conctrl $(SRC_PATH)/procesoctrl
 
-procesoctrl: procesoctrl.o ControllerProcessAux.o
-	$(CXX) -o $(SRC_PATH)/$@ $(OBJECTS1) $(CXXFLAGS)
+$(SRC_PATH)/procesoctrl: $(SRC_PATH)/procesoctrl.o $(SRC_PATH)/ControllerProcessAux.o
+	$(CXX) -o $@ $^ $(CXXFLAGS)
 
-procesoctrl.o: $(SRC_PATH)/ControllerProcess.cpp
-	$(CXX) -c $(CXXFLAGS) -I$(SRC_PATH) $< -o $(SRC_PATH)/$@
+$(SRC_PATH)/procesoctrl.o: $(SRC_PATH)/ControllerProcess.cpp
+	$(CXX) -c $(CXXFLAGS) -I$(SRC_PATH) $< -o $@
 	
-ControllerProcessAux.o: $(SRC_PATH)/ControllerProcessAux.cpp
-	$(CXX) -c $(CXXFLAGS) $< -o $(SRC_PATH)/$@
+$(SRC_PATH)/ControllerProcessAux.o: $(SRC_PATH)/ControllerProcessAux.cpp
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 
-conctrl: main.o ControlConsole.o ConsoleThread.o
-	$(CXX) -o $(SRC_PATH)/$@ $(OBJECTS) $(CXXFLAGS)
+$(SRC_PATH)/conctrl: $(SRC_PATH)/main.o $(SRC_PATH)/ControlConsole.o $(SRC_PATH)/ConsoleThread.o
+	$(CXX) -o $@ $^ $(CXXFLAGS)
 
-main.o: $(SRC_PATH)/main.cpp
-	$(CXX) -c $(CXXFLAGS) -I$(SRC_PATH) $< -o $(SRC_PATH)/$@
+$(SRC_PATH)/main.o: $(SRC_PATH)/main.cpp
+	$(CXX) -c $(CXXFLAGS) -I$(SRC_PATH) $< -o $@
 
-ControlConsole.o: $(SRC_PATH)/ControlConsole.cpp
-	$(CXX) -c $(CXXFLAGS) $< -o $(SRC_PATH)/$@
+$(SRC_PATH)/ControlConsole.o: $(SRC_PATH)/ControlConsole.cpp
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 
-ConsoleThread.o: $(SRC_PATH)/ConsoleThread.cpp
-	$(CXX) -c $(CXXFLAGS) $< -o $(SRC_PATH)/$@
+$(SRC_PATH)/ConsoleThread.o: $(SRC_PATH)/ConsoleThread.cpp
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 
-init: $(SRC_PATH)/conctrl
+init: all
 	mkdir -p $(OUT_PATH)
-	mv $< $(OUT_PATH)
+	mv $(SRC_PATH)/conctrl $(OUT_PATH)
+	mv $(SRC_PATH)/procesoctrl $(OUT_PATH)
+	
 clean:
-	rm $(SRC_PATH)/*.o
-	rm $(SRC_PATH)/conctrl
-	rm $(SRC_PATH)/procesoctrl
-	rm $(SRC_PATH)/log.txt
+	rm -f $(SRC_PATH)/*.o
+	rm -f $(SRC_PATH)/conctrl
+	rm -f $(SRC_PATH)/procesoctrl
+	rm -rf $(OUT_PATH)
+	rm -f $(SRC_PATH)/log.txt
+
+install: all
+	mkdir -p $(PREFIX)/bin
+	mv $(SRC_PATH)/conctrl $(PREFIX)/bin
+	mv $(SRC_PATH)/procesoctrl $(PREFIX)/bin
+	cp -r ./examples $(PREFIX)

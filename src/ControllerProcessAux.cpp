@@ -241,12 +241,12 @@ void ControllerProcessAux::initializeSharedMemory(){
       exit(1); 
    }
    
-   /* shared sharedMemory */
+   /* sharedMemory */
    /* we declared to zone to share */
    this->sharedMemory = (MemoriaCompartida *)shmat (id_MemZone, (char *)0, 0);
    if (sharedMemory == NULL) {
-       cerr << "Error reserve shared memory" << endl;
-      exit(1);
+        cerr << "Error reserve shared memory" << endl;
+        exit(1);
    }
 }
 
