@@ -1,0 +1,16 @@
+ProcesoSui one { ./../examples/ProcesoSuicidaLinux/src :: primero 4 }
+ProcesoSui two { ./../examples/ProcesoSuicidaLinux/src :: segundo 2 }
+ProcesoSui three { ./../examples/ProcesoSuicidaLinux/src :: tercero 3 }
+ProcesoSui four { ./../examples/ProcesoSuicidaLinux/src :: tercero 4 }
+ProcesoSui five { ./../examples/ProcesoSuicidaLinux/src :: primero 7 }
+ProcesoSui six { ./../examples/ProcesoSuicidaLinux/src :: segundo 2 }
+ProcesoSui seven { ./../examples/ProcesoSuicidaLinux/src :: tercero 3 }
+ProcesoSui eight { ./../examples/ProcesoSuicidaLinux/src :: tercero 4 }
+ProcesoSui nine { ./../examples/ProcesoSuicidaLinux/src :: primero 7 }
+ProcesoSui ten { ./../examples/ProcesoSuicidaLinux/src :: segundo 2 }
+ProcesoSui eleven { ./../examples/ProcesoSuicidaLinux/src :: tercero 2 }
+ProcesoSui twelve { ./../examples/ProcesoSuicidaLinux/src :: tercero 4 }
+ProcesoSui thirteen { ./../examples/ProcesoSuicidaLinux/src :: primero 7 }
+ProcesoSui fourteen { ./../examples/ProcesoSuicidaLinux/src :: segundo 2 }
+ProcesoSui fifteen { ./../examples/ProcesoSuicidaLinux/src :: tercero 3 }
+ProcesoSui sixteen { ./../examples/ProcesoSuicidaLinux/src :: tercero 4 }

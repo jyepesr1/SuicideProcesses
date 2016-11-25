@@ -85,7 +85,7 @@ int main(int argc, const char *argv[]){
    controlConsole->readFile(routeConfigFile);
    controlConsole->createInterpreter();
    
-   delete controlConsole;
+   //delete controlConsole;
    
    return 0;
 }

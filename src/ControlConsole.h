@@ -22,7 +22,7 @@ using namespace std;
 class ControlConsole{
    private:
       string routeConfigFile;
-      int idMem, idSem, id_MemZone;
+      int idMem, idSem, id_MemZone, mapSize;
       mutex mut;
       map<string,ConsoleThread*> consoleThreadsMap;
       thread controlConsoleThreadCheckControllerProcesses;

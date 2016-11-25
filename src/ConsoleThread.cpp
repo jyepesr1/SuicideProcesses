@@ -35,8 +35,8 @@ void ConsoleThread::readBuffer(){
       FILE *stream;
       stream = fdopen (fd[0][READ_END], "r");
       while(fgets(buf, sizeof(buf), stream)){
-         printf("%s", buf);
          cout << "conctrl> ";
+         printf("%s", buf);
          fflush(stream);
       }
       fclose(stream);
@@ -87,7 +87,7 @@ void ConsoleThread::callNotifyRead(string command){
 }
 
 void ConsoleThread::createControllerProcess(){
-   cout << "Thread: " << suicideProcess->id << " Lives: " << suicideProcess->lives << endl;
+   //cout << "Thread: " << suicideProcess->id << " Lives: " << suicideProcess->lives << endl;
    string filePath = suicideProcess->filePath;
    string fileName = suicideProcess->fileName;
    string lives = to_string(suicideProcess->lives);

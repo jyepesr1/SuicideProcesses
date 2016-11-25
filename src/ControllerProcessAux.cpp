@@ -10,8 +10,9 @@ ControllerProcessAux::ControllerProcessAux(string filePath, string fileName, str
         INFINITE = true;
     }
     suicide = thread(&ControllerProcessAux::createSuicideProcess, this);
-    readthread = thread(&ControllerProcessAux::readBuffer, this);
+    //readthread = thread(&ControllerProcessAux::readBuffer, this);
 }
+
 
 void ControllerProcessAux::setId(string id){
     this->id = id;
@@ -56,10 +57,8 @@ void ControllerProcessAux::createSuicideProcess(){
             case 0:
                 close(fd[0][READ_END]);
                 dup2(fd[0][WRITE_END], WRITE_END);
-         
                 close(fd[2][READ_END]);
                 dup2(fd[2][ERR_END], ERR_END);
-         
                 close(fd[1][WRITE_END]);
                 dup2(fd[1][READ_END], READ_END);
                 
@@ -72,17 +71,17 @@ void ControllerProcessAux::createSuicideProcess(){
                 ofstream outputFile("log.txt", fstream::in | fstream::out | fstream::app);
                 if(!INFINITE){
                     lives--;
-                    outputFile << "Suicide process " << fileName << " ended because of " << childStatus << 
+                    outputFile << "Suicide process " << this->id << " ended because of " << childStatus << 
                     " -- Controller process " << controllerNum << ", remaining lives: "<< lives << endl;
                     
-                    cout << "Suicide process " << fileName << " ended because of " << childStatus << 
+                    cout << "Suicide process " << this->id << " ended because of " << childStatus << 
                     " -- Controller process " << controllerNum << ", remaining lives: "<< lives << endl;
                 
                 }else{
-                    outputFile << "Suicide process " << fileName << " ended because of " << childStatus << 
+                    outputFile << "Suicide process " << this->id << " ended because of " << childStatus << 
                     " -- Controller process " << controllerNum<< ", remaining lives: Infinite " << endl;
                     
-                    cout << "Suicide process " << fileName << " ended because of " << childStatus << 
+                    cout << "Suicide process " << this->id << " ended because of " << childStatus << 
                     " -- Controller process " << controllerNum << ", remaining lives: Infinite " << endl;
                     
                 }
@@ -149,7 +148,7 @@ void ControllerProcessAux::getOperation(string command, string number){
 
 void ControllerProcessAux::list(){
     cout << "Controller process " << controllerNum << ": "
-         << "Suicide process " << fileName << ", "
+         << "Suicide process " << this->id << ", "
          << "File path: " << filePath << ", "
          << "Id memory: " << idMem << ", "
          << "Id semaphore: " << idSem << ", ";
@@ -162,31 +161,31 @@ void ControllerProcessAux::list(){
 
 void ControllerProcessAux::sum(int num){
     if(INFINITE){
-        cout << "Suicide process " << fileName << " couldn't add more lives "
+        cout << "Suicide process " << this->id << " couldn't add more lives "
         " -- Controller process " << controllerNum << ", remaining lives: Infinite" << endl;
     }else{
         this->lives = this->lives + num;
-        cout << "Suicide process " << fileName << " has added " << num << 
+        cout << "Suicide process " << this->id << " has added " << num << 
         " lives -- Controller process " << controllerNum << ", remaining lives: "<< lives << endl;
     }
 }
 
 void ControllerProcessAux::sub(int num){
     if(INFINITE){
-        cout << "Suicide process " << fileName << " couldn't lose lives "
+        cout << "Suicide process " << this->id << " couldn't lose lives "
         " -- Controller process " << controllerNum << ", remaining lives: Infinite" << endl;
     }else if((this->lives - num) <= 0){
         cerr << "Operation substract is invalid" << endl;
     }else{
         this->lives = this->lives - num;
-        cout << "Suicide process " << fileName << " has lost " << num << 
+        cout << "Suicide process " << this->id << " has lost " << num << 
         " lives -- Controller process " << controllerNum << ", remaining lives "<< lives << endl;
     }
 }
 
 void ControllerProcessAux::suspend(){
     executionStatus = false;
-    cout << "Suicide process " << fileName << " has been suspended " <<
+    cout << "Suicide process " << this->id << " has been suspended " <<
     " -- Controller process " << controllerNum << ", remaining lives: "<< lives << endl;
 }
 
@@ -194,18 +193,18 @@ void ControllerProcessAux::restore(){
     unique_lock<mutex> lock(mutExecution);
     executionStatus = true;
     executionVar.notify_one();
-    cout << "Suicide process " << fileName << " has been restored " <<
+    cout << "Suicide process " << this->id << " has been restored " <<
     " -- Controller process " << controllerNum << ", remaining lives: "<< lives << endl;
 }
 
 void ControllerProcessAux::undefine(){
     if(INFINITE){
-        cout << "Suicide process " << fileName << " already had infinite lives " <<
+        cout << "Suicide process " << this->id << " already had infinite lives " <<
         " -- Controller process " << controllerNum << ", remaining lives: Infinite" << endl;
     }else{
         this->lives = 0;
         INFINITE = true;
-        cout << "Suicide process " << fileName << " has been undefined " <<
+        cout << "Suicide process " << this->id << " has been undefined " <<
         " -- Controller process " << controllerNum << ", remaining lives: Infinite" << endl;
     }
 }
@@ -215,7 +214,7 @@ void ControllerProcessAux::define(int num){
         INFINITE = false;
     }
     this->lives = num;
-    cout << "Suicide process " << fileName << " has been defined " <<
+    cout << "Suicide process " << this->id << " has been defined " <<
     " -- Controller process " << controllerNum << ", remaining lives "<< lives << endl;
 }
 void ControllerProcessAux::end(){
@@ -223,7 +222,7 @@ void ControllerProcessAux::end(){
     try{
         exit(1);
     }catch(int &z){
-        cerr << "Error finishing process " << fileName << endl;
+        cerr << "Error finishing process " << this->id << endl;
     }
 }
 

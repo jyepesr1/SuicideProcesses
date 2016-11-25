@@ -252,7 +252,7 @@ void ControlConsole::readFile(string file){
          i++;
       }
       myfile.close();
-      int mapSize = consoleThreadsMap.size();
+      mapSize = consoleThreadsMap.size();
       for(auto& thread : consoleThreadsMap){
          thread.second->setMapSize(mapSize);
       }
@@ -283,7 +283,8 @@ void ControlConsole::checkControllerProcesses(){
    this->sharedMemory->muertes = (InfoMuerte* )(sharedMemory + 1);
    cout << "-------------------------" << endl;
    cout << "sharedMemory->valSeq: " << sharedMemory->valSeq << endl;
-   for(int i =0; i< 4; i++){
+   for(int i =0; i< mapSize; i++){
+      cout << "-------------------------" << endl;
       cout << "sharedMemory->muertes[" << i << "].id: " << sharedMemory->muertes[i].id << endl;
       cout << "sharedMemory->muertes[" << i << "].nDecesos: " << sharedMemory->muertes[i].nDecesos << endl;
    }

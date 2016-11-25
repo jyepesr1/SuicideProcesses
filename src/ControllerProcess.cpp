@@ -63,5 +63,5 @@ int main(int argc, char *argv[]){
       controllerProcessAux->getOperation(command, number);
    }
    
-   delete controllerProcessAux;
+   //delete controllerProcessAux;
 }
