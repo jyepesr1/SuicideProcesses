@@ -146,7 +146,7 @@ void ControlConsole::callThread(string command, string id, string number){
          for(auto it=consoleThreadsMap.begin(); it!=consoleThreadsMap.end(); ++it){
             //cout << it->first;
             it->second->callNotifyWrite(command,it->first, number);
-            if(command == "terminar") exit(1);
+            if(command == "terminar") exit(0);
          }
       }catch(const out_of_range& oor){
          cerr << "Suicide Process doesn't exist" << endl;
